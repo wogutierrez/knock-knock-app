@@ -1,0 +1,6 @@
+/* Explicit height styling ensures Leaflet map renders smoothly without blank spaces */
+#map {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
