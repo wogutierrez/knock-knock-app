@@ -102,8 +102,17 @@
       <!-- TAB VIEW 1: SATELLITE MAP SCREEN      -->
       <!-- -------------------------------------- -->
       <div id="tab-map" class="w-full h-full relative">
-        <!-- Leaflet Map Mount Point (Targeted by map.js) -->
+        <!-- Leaflet Map Mount Point -->
         <div id="map"></div>
+
+        <!-- FLOATING RE-CENTER GPS BUTTON -->
+        <<button
+          id="recenter-btn"
+          class="absolute bottom-6 right-6 z-[1000] bg-slate-800 hover:bg-slate-700 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-600 flex items-center gap-2 text-sm font-semibold active:scale-95 transition-all duration-200"
+          aria-label="Re-center to your location"
+        >
+          📍 My Location
+        </button>
       </div>
 
       <!-- -------------------------------------- -->

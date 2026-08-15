@@ -105,16 +105,65 @@ if (visitForm) {
 
     L.marker([newRecord.lat, newRecord.lng], { icon: customIcon }).addTo(map)
       .bindPopup(`
-        <div style="color: #0f172a; font-family: sans-serif;">
-            <b style="font-size: 14px;">${iconEmoji} ${status}</b><br>
-            <span>Householder: ${person}</span><br>
-            <small style="color: #64748b;">Logged by ${publisher} on ${dateLogged}</small>
-        </div>
-      `);
+    <div style="color: #0f172a; font-family: sans-serif;">
+        <b style="font-size: 14px;">${iconEmoji} ${status}</b><br>
+        <span>Householder: ${person}</span><br>
+        <small style="color: #64748b;">Logged by ${publisher} on ${dateLogged}</small>
+        <br><br>
+        <button onclick="deletePin(${newRecord.id})" 
+                style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; width: 100%;">
+            🗑️ Delete Pin
+        </button>
+    </div>
+  `);
 
     renderRecordsList();
     visitForm.reset();
     prepareVisitModal();
     modal.classList.add("hidden");
   });
+}
+
+// ==========================================
+// DELETE PIN FUNCTION
+// ==========================================
+function deletePin(recordId) {
+  // 1. Find the record in our array
+  const recordIndex = visitRecords.findIndex((rec) => rec.id === recordId);
+
+  if (recordIndex === -1) {
+    console.log("Record not found!");
+    return;
+  }
+
+  // 2. Get the record we want to delete
+  const recordToDelete = visitRecords[recordIndex];
+
+  // 3. Remove the pin from the map
+  // We need to find and remove the marker
+  map.eachLayer(function (layer) {
+    // Check if this layer is a marker
+    if (layer instanceof L.Marker) {
+      // Get the marker's position
+      const latLng = layer.getLatLng();
+      // Check if it matches our record's coordinates
+      if (
+        latLng.lat === recordToDelete.lat &&
+        latLng.lng === recordToDelete.lng
+      ) {
+        map.removeLayer(layer);
+      }
+    }
+  });
+
+  // 4. Remove the record from the array
+  visitRecords.splice(recordIndex, 1);
+
+  // 5. Update the records list display
+  renderRecordsList();
+
+  // 6. Close any open popup
+  map.closePopup();
+
+  console.log(`✅ Deleted record with ID: ${recordId}`);
 }

@@ -40,3 +40,60 @@ map.on("click", (e) => {
   activeTempCoords = e.latlng;
   document.getElementById("visit-modal").classList.remove("hidden");
 });
+
+// ==========================================
+// RE-CENTER GPS LOCATION BUTTON
+// ==========================================
+
+// Get the button element
+const recenterBtn = document.getElementById("recenter-btn");
+
+// Check if the button exists
+if (recenterBtn) {
+  // Add click event listener
+  recenterBtn.addEventListener("click", function () {
+    // Show a loading state (optional)
+    recenterBtn.textContent = "⏳ Getting location...";
+    recenterBtn.style.opacity = "0.7";
+
+    // Check if geolocation is available
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        // SUCCESS: We got the location
+        function (position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          // Move the map to user's location with zoom level 18
+          map.setView([lat, lng], 18);
+
+          // Reset the button
+          recenterBtn.innerHTML = "📍 My Location";
+          recenterBtn.style.opacity = "1";
+
+          console.log(`📍 Re-centered to: ${lat}, ${lng}`);
+        },
+        // ERROR: Could not get location
+        function (error) {
+          console.error("Geolocation error:", error.message);
+          alert("Unable to get your location. Please check your GPS settings.");
+
+          // Reset the button
+          recenterBtn.innerHTML = "📍 My Location";
+          recenterBtn.style.opacity = "1";
+        },
+        // OPTIONS: High accuracy
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    } else {
+      // Geolocation not supported
+      alert("Geolocation is not supported by your browser.");
+      recenterBtn.innerHTML = "📍 My Location";
+      recenterBtn.style.opacity = "1";
+    }
+  });
+}
