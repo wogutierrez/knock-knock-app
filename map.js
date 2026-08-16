@@ -234,6 +234,8 @@ function cacheArea(lat, lng) {
 // Add click event to the button
 if (cacheAreaBtn) {
   cacheAreaBtn.addEventListener("click", function () {
+    alert("Button clicked!"); // <-- ADD THIS LINE
+
     // Get the current map center
     const center = map.getCenter();
     const lat = center.lat;
@@ -243,6 +245,4 @@ if (cacheAreaBtn) {
     cacheArea(lat, lng);
   });
   console.log("✅ Cache button is ready!");
-} else {
-  console.log("❌ Cache button not found in HTML!");
 }
