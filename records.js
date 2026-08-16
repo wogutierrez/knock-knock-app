@@ -41,6 +41,60 @@ function loadRecords() {
 }
 
 /**
+ * Recreate all pins on the map from saved records
+ */
+function recreatePins() {
+  // Only run if map exists
+  if (typeof map === "undefined") {
+    console.log("⏳ Map not ready yet, will retry...");
+    setTimeout(recreatePins, 500);
+    return;
+  }
+
+  console.log(`📍 Recreating ${visitRecords.length} pins on the map...`);
+
+  visitRecords.forEach((rec) => {
+    // Determine the icon based on status
+    let iconEmoji = "🏠";
+    let bgStyle = "background-color: #ef4444; border-color: #ffffff;";
+
+    if (rec.status === "Preached") {
+      iconEmoji = "✅";
+      bgStyle = "background-color: #10b981; border-color: #ffffff;";
+    } else if (rec.status === "Return Visit") {
+      iconEmoji = "⏰";
+      bgStyle = "background-color: #3b82f6; border-color: #ffffff;";
+    } else if (rec.status === "Bible Study") {
+      iconEmoji = "📖";
+      bgStyle = "background-color: #eab308; border-color: #ffffff;";
+    }
+
+    const customIcon = L.divIcon({
+      className: "custom-map-icon",
+      html: `<div style="${bgStyle} width: 34px; height: 34px; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);">${iconEmoji}</div>`,
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+      popupAnchor: [0, -18]
+    });
+
+    L.marker([rec.lat, rec.lng], { icon: customIcon }).addTo(map).bindPopup(`
+        <div style="color: #0f172a; font-family: sans-serif;">
+            <b style="font-size: 14px;">${iconEmoji} ${rec.status}</b><br>
+            <span>Householder: ${rec.person}</span><br>
+            <small style="color: #64748b;">Logged by ${rec.publisher} on ${rec.date}</small>
+            <br><br>
+            <button onclick="deletePin(${rec.id})" 
+                    style="background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; width: 100%;">
+                🗑️ Delete Pin
+            </button>
+        </div>
+      `);
+  });
+
+  console.log(`✅ Recreated ${visitRecords.length} pins`);
+}
+
+/**
  * Render the records list
  */
 function renderRecordsList() {
@@ -106,9 +160,15 @@ function renderRecordsList() {
 // ==========================================
 
 // Load records from localStorage when the page loads
-loadRecords();
+const recordsLoaded = loadRecords();
 
 // Re-render the records list
 renderRecordsList();
+
+// Recreate pins on the map if records exist
+if (recordsLoaded && visitRecords.length > 0) {
+  // Small delay to ensure map is ready
+  setTimeout(recreatePins, 500);
+}
 
 console.log("📂 Records persistence ready!");
