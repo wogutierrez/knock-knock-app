@@ -60,7 +60,7 @@ self.addEventListener("fetch", (e) => {
                 }
               })
               .catch(() => {
-                /* Silence errors when offline */
+                /* Silence network errors when offline */
               });
 
             return cachedResponse;
