@@ -107,13 +107,3 @@ if (recenterBtn) {
     }
   });
 }
-
-// ==========================================
-// UI REFERENCES (Used by both pre-fetch and cache button)
-// ==========================================
-
-// References to UI elements
-const cacheProgress = document.getElementById("cache-progress");
-const cacheStatusText = document.getElementById("cache-status-text");
-const cacheProgressText = document.getElementById("cache-progress-text");
-const cacheProgressBar = document.getElementById("cache-progress-bar");
