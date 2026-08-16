@@ -233,8 +233,10 @@ function cacheArea(lat, lng) {
 
 // Add click event to the button
 if (cacheAreaBtn) {
-  cacheAreaBtn.addEventListener("click", function () {
-    alert("Button clicked!"); // <-- ADD THIS LINE
+  // Function to handle the cache action
+  function handleCacheAction(e) {
+    e.preventDefault(); // Prevent any default behavior
+    alert("Button clicked!"); // Test alert
 
     // Get the current map center
     const center = map.getCenter();
@@ -243,6 +245,11 @@ if (cacheAreaBtn) {
 
     console.log(`📍 Caching area around: ${lat}, ${lng}`);
     cacheArea(lat, lng);
-  });
+  }
+
+  // Add both click and touchstart events
+  cacheAreaBtn.addEventListener("click", handleCacheAction);
+  cacheAreaBtn.addEventListener("touchstart", handleCacheAction);
+
   console.log("✅ Cache button is ready!");
 }
