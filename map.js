@@ -230,13 +230,15 @@ function cacheArea(lat, lng) {
 
   fetchNextTile();
 }
-
 // Add click event to the button
 if (cacheAreaBtn) {
   // Function to handle the cache action
   function handleCacheAction(e) {
     e.preventDefault(); // Prevent any default behavior
-    alert("Button clicked!"); // Test alert
+
+    // Change button text to show it was clicked
+    this.textContent = "⏳ Working...";
+    this.style.opacity = "0.7";
 
     // Get the current map center
     const center = map.getCenter();
@@ -247,7 +249,7 @@ if (cacheAreaBtn) {
     cacheArea(lat, lng);
   }
 
-  // Add both click and touchstart events
+  // Add both events
   cacheAreaBtn.addEventListener("click", handleCacheAction);
   cacheAreaBtn.addEventListener("touchstart", handleCacheAction);
 
