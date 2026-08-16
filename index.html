@@ -299,12 +299,18 @@
     <!-- ========================================== -->
     <!-- 7. SCRIPT INVOCATION & SERVICE WORKER     -->
     <!-- ========================================== -->
+    <!-- 1. Leaflet Library -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="map.js"></script>
+
+    <!-- 2. Data Storage Manager FIRST -->
     <script src="records.js"></script>
+
+    <!-- 3. UI, Map & Settings Logic -->
+    <script src="map.js"></script>
     <script src="settings.js"></script>
     <script src="app.js"></script>
 
+    <!-- 4. Service Worker Registration -->
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
