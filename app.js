@@ -80,6 +80,7 @@ if (visitForm) {
     };
 
     visitRecords.push(newRecord);
+    saveRecords(); // <-- ADDED: Save after adding
 
     let iconEmoji = "🏠";
     let bgStyle = "background-color: #ef4444; border-color: #ffffff;";
@@ -158,6 +159,7 @@ function deletePin(recordId) {
 
   // 4. Remove the record from the array
   visitRecords.splice(recordIndex, 1);
+  saveRecords(); // <-- ADDED: Save after deleting
 
   // 5. Update the records list display
   renderRecordsList();

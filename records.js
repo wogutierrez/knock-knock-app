@@ -5,6 +5,9 @@
 // Key used to store records in localStorage
 const STORAGE_KEY = "knock-knock-visits";
 
+// Visit records array
+let visitRecords = [];
+
 /**
  * Save visit records to localStorage
  */
@@ -37,14 +40,26 @@ function loadRecords() {
   }
 }
 
-let visitRecords = [];
-
+/**
+ * Render the records list
+ */
 function renderRecordsList() {
   const container = document.getElementById("records-container");
   const counter = document.getElementById("tab-count");
 
   if (counter) counter.innerText = visitRecords.length;
-  if (visitRecords.length === 0 || !container) return;
+
+  if (visitRecords.length === 0 || !container) {
+    // Show empty message
+    if (container) {
+      container.innerHTML = `
+        <div class="text-slate-400 text-center py-10 text-sm">
+          No houses logged yet. Tap any house roof on the map to add a visit!
+        </div>
+      `;
+    }
+    return;
+  }
 
   container.innerHTML = visitRecords
     .map(
@@ -81,4 +96,19 @@ function renderRecordsList() {
 `
     )
     .join("");
+
+  // Save records after rendering
+  saveRecords();
 }
+
+// ==========================================
+// LOAD RECORDS ON PAGE START
+// ==========================================
+
+// Load records from localStorage when the page loads
+loadRecords();
+
+// Re-render the records list
+renderRecordsList();
+
+console.log("📂 Records persistence ready!");
