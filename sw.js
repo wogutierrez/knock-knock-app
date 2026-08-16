@@ -1,4 +1,4 @@
-const APP_SHELL_CACHE = "knock-knock-v1";
+const APP_SHELL_CACHE = "knock-knock-v3";
 const TILE_CACHE = "esri-satellite-cache-v1";
 
 const APP_ASSETS = [
