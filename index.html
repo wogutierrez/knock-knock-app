@@ -9,7 +9,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <title>Knock-Knock App v1</title>
+    <title>Knock Knock App v2.6 Build 002</title>
 
     <!-- Mobile App Standalone & PWA Features -->
     <meta name="mobile-web-app-capable" content="yes" />
@@ -107,18 +107,51 @@
       <!-- -------------------------------------- -->
       <!-- TAB VIEW 1: SATELLITE MAP SCREEN      -->
       <!-- -------------------------------------- -->
+
       <div id="tab-map" class="w-full h-full relative">
         <!-- Leaflet Map Mount Point -->
         <div id="map"></div>
 
         <!-- FLOATING RE-CENTER GPS BUTTON -->
-        <<button
+        <button
           id="recenter-btn"
           class="absolute bottom-6 right-6 z-[1000] bg-slate-800 hover:bg-slate-700 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-600 flex items-center gap-2 text-sm font-semibold active:scale-95 transition-all duration-200"
           aria-label="Re-center to your location"
         >
           📍 My Location
         </button>
+
+        <!-- ====== NEW: CACHE PROGRESS TOAST ====== -->
+        <!-- Shows pre-fetch progress in the bottom-left corner -->
+        <div
+          id="cache-progress"
+          class="absolute bottom-6 left-6 z-[1000] bg-slate-800/95 backdrop-blur-sm border border-slate-700 rounded-xl px-4 py-3 shadow-lg hidden min-w-[200px]"
+        >
+          <div class="flex items-center gap-3">
+            <!-- Spinner animation -->
+            <div
+              class="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"
+            ></div>
+            <div>
+              <p id="cache-status-text" class="text-xs font-medium text-white">
+                Pre-fetching tiles...
+              </p>
+              <p id="cache-progress-text" class="text-[10px] text-slate-400">
+                0 / 0 tiles
+              </p>
+            </div>
+          </div>
+          <!-- Progress bar -->
+          <div
+            class="w-full h-1 bg-slate-700 rounded-full mt-2 overflow-hidden"
+          >
+            <div
+              id="cache-progress-bar"
+              class="h-full bg-emerald-400 rounded-full transition-all duration-300"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
       </div>
 
       <!-- -------------------------------------- -->
