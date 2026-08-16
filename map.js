@@ -9,6 +9,8 @@ const tileLayer = L.tileLayer(
     maxZoom: 19,
     attribution: "Tiles &copy; Esri",
     useCache: true,
+    crossOrigin: true, // Essential for fetching image tiles into IndexedDB via PouchDB
+    cacheMaxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
     cacheDbName: "knock-knock-tiles"
   }
 ).addTo(map);
@@ -40,7 +42,8 @@ let activeTempCoords = null;
 // --- 3. ROOF TAP EVENT LISTENER ---
 map.on("click", (e) => {
   activeTempCoords = e.latlng;
-  document.getElementById("visit-modal").classList.remove("hidden");
+  const visitModal = document.getElementById("visit-modal");
+  if (visitModal) visitModal.classList.remove("hidden");
 });
 
 // ==========================================
@@ -89,14 +92,28 @@ const progressBar = document.getElementById("toast-progress-bar");
 
 if (downloadBtn) {
   downloadBtn.addEventListener("click", () => {
+    console.log("📥 Download button clicked...");
+
+    // Get currently visible area bounding box
     const bbox = map.getBounds();
-    // Seed zooms 15 to 18 for current map bounding box
-    tileLayer.seed(bbox, 15, 18);
+    const minZoom = 15;
+    const maxZoom = 18;
+
+    try {
+      // Trigger the PouchDB TileLayer seed function
+      tileLayer.seed(bbox, minZoom, maxZoom);
+    } catch (err) {
+      console.error("Error starting seed process:", err);
+      alert(
+        "Could not start downloading tiles for this area. Try zooming in slightly first."
+      );
+    }
   });
 }
 
 // Event 1: Seeding Starts
 tileLayer.on("seedstart", (e) => {
+  console.log("Seed started. Total tiles queued:", e.queueLength);
   if (tileToast) tileToast.classList.remove("hidden");
   if (toastTitle) toastTitle.innerText = "Caching Area Tiles...";
   if (toastCounter) toastCounter.innerText = `0 / ${e.queueLength}`;
@@ -114,6 +131,7 @@ tileLayer.on("seedprogress", (e) => {
 
 // Event 3: Seeding Complete
 tileLayer.on("seedend", () => {
+  console.log("Seed completed!");
   if (toastTitle) toastTitle.innerText = "✓ Area Downloaded!";
   if (progressBar) progressBar.style.width = "100%";
   if (downloadBtn) downloadBtn.disabled = false;
