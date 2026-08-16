@@ -1,3 +1,42 @@
+// ==========================================
+// LOCAL STORAGE PERSISTENCE
+// ==========================================
+
+// Key used to store records in localStorage
+const STORAGE_KEY = "knock-knock-visits";
+
+/**
+ * Save visit records to localStorage
+ */
+function saveRecords() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(visitRecords));
+    console.log(`💾 Saved ${visitRecords.length} records to localStorage`);
+  } catch (error) {
+    console.error("Error saving records:", error);
+  }
+}
+
+/**
+ * Load visit records from localStorage
+ */
+function loadRecords() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+      visitRecords = JSON.parse(data);
+      console.log(`📂 Loaded ${visitRecords.length} records from localStorage`);
+      return true;
+    } else {
+      console.log("📂 No saved records found");
+      return false;
+    }
+  } catch (error) {
+    console.error("Error loading records:", error);
+    return false;
+  }
+}
+
 let visitRecords = [];
 
 function renderRecordsList() {
