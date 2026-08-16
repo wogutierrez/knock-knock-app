@@ -131,6 +131,7 @@ let isCaching = false;
 /**
  * Cache tiles for a 1 km radius around a given center
  */
+
 function cacheArea(lat, lng) {
   if (isCaching) {
     alert("Cache is already in progress. Please wait.");
@@ -148,7 +149,6 @@ function cacheArea(lat, lng) {
   const zoom = 18;
   const tilesPerSide = Math.pow(2, zoom);
 
-  // Convert lat/lng to tile coordinates
   function latLngToTile(lat, lng) {
     const x = Math.floor(((lng + 180) / 360) * tilesPerSide);
     const y = Math.floor(
@@ -163,13 +163,9 @@ function cacheArea(lat, lng) {
     return { x, y };
   }
 
-  // Get the center tile
   const centerTile = latLngToTile(lat, lng);
-
-  // 1 km radius at zoom 18 = about 2 tiles in each direction
   const tileRadius = 2;
 
-  // Generate tiles in a square around the center
   for (let dx = -tileRadius; dx <= tileRadius; dx++) {
     for (let dy = -tileRadius; dy <= tileRadius; dy++) {
       const x = centerTile.x + dx;
@@ -196,6 +192,13 @@ function cacheArea(lat, lng) {
       cacheProgressText.textContent = `${totalTiles} / ${totalTiles} tiles`;
       cacheProgressBar.style.width = "100%";
       isCaching = false;
+
+      // ====== RESET THE BUTTON ======
+      const cacheAreaBtn = document.getElementById("cache-area-btn");
+      if (cacheAreaBtn) {
+        cacheAreaBtn.textContent = "📥 Cache 1 km";
+        cacheAreaBtn.style.opacity = "1";
+      }
 
       setTimeout(() => {
         cacheProgress.classList.add("hidden");
@@ -230,6 +233,7 @@ function cacheArea(lat, lng) {
 
   fetchNextTile();
 }
+
 // Add click event to the button
 if (cacheAreaBtn) {
   // Function to handle the cache action
