@@ -2,12 +2,22 @@
 // Default centered view
 const map = L.map("map").setView([17.8252, 31.0335], 16);
 
-// Load Esri World Imagery Satellite Tiles
-L.tileLayer(
+// Load Esri World Imagery Satellite Tiles with Offline Caching
+const tileLayer = L.tileLayer(
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
   {
     maxZoom: 19,
-    attribution: "Tiles &copy; Esri"
+    attribution: "Tiles &copy; Esri",
+
+    // ==== CACHE CONFIGURATION ====
+    // This tells the plugin to cache tiles using PouchDB
+    useCache: true,
+
+    // How many tiles to keep in cache (1000 tiles is about 50-100 MB)
+    cacheMaxAge: 1000,
+
+    // Database name (so multiple apps can have separate caches)
+    cacheDbName: "knock-knock-tiles"
   }
 ).addTo(map);
 
