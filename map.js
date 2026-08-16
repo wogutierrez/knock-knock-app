@@ -235,14 +235,18 @@ function cacheArea(lat, lng) {
 }
 
 // Add click event to the button
+// Add click event to the button
 if (cacheAreaBtn) {
   // Function to handle the cache action
   function handleCacheAction(e) {
     e.preventDefault(); // Prevent any default behavior
 
+    // Get the button directly by ID
+    const btn = document.getElementById("cache-area-btn");
+
     // Change button text to show it was clicked
-    this.textContent = "⏳ Working...";
-    this.style.opacity = "0.7";
+    btn.textContent = "⏳ Working...";
+    btn.style.opacity = "0.7";
 
     // Get the current map center
     const center = map.getCenter();
