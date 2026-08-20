@@ -37,6 +37,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Helper function: Load saved default settings into the visit modal form
+  const populateModalDefaults = () => {
+    const pubInput = document.getElementById("publisher-name");
+    const congInput = document.getElementById("visit-congregation");
+    const grpInput = document.getElementById("visit-group");
+    const terrInput = document.getElementById("visit-territory");
+
+    if (pubInput)
+      pubInput.value = localStorage.getItem("kk_default_publisher") || "";
+    if (congInput)
+      congInput.value = localStorage.getItem("kk_default_congregation") || "";
+    if (grpInput)
+      grpInput.value = localStorage.getItem("kk_default_group") || "";
+    if (terrInput)
+      terrInput.value = localStorage.getItem("kk_default_territory") || "";
+  };
+
+  // Attach populator to map click event
+  if (typeof map !== "undefined") {
+    map.on("click", () => {
+      populateModalDefaults();
+    });
+  }
+
   // ==========================================
   // 2. MODAL FORM SUBMIT & SAVING HANDLER
   // ==========================================
@@ -66,11 +90,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const personInput = document.getElementById("person-name");
       const phoneInput = document.getElementById("phone-number");
       const statusInput = document.getElementById("visit-status");
+      const congregationInput = document.getElementById("visit-congregation");
+      const groupInput = document.getElementById("visit-group");
+      const territoryInput = document.getElementById("visit-territory");
 
       const newRecord = {
         id: Date.now(),
         lat: window.activeTempCoords.lat,
         lng: window.activeTempCoords.lng,
+        congregation: congregationInput ? congregationInput.value : "N/A",
+        group: groupInput ? groupInput.value : "N/A",
+        territory: territoryInput ? territoryInput.value : "N/A",
         publisher: publisherInput ? publisherInput.value : "Anonymous",
         person:
           personInput && personInput.value ? personInput.value : "House Visit",
