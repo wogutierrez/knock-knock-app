@@ -464,5 +464,43 @@
         });
       }
     </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const versionBadge = document.getElementById("app-version");
+        if (!versionBadge) return;
+
+        const isDev =
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1";
+        const envTag = isDev ? "DEV" : "PROD";
+
+        try {
+          // Perform a lightweight HEAD request to fetch file deployment headers
+          const res = await fetch(window.location.href, {
+            method: "HEAD",
+            cache: "no-store"
+          });
+          const lastModifiedHeader = res.headers.get("Last-Modified");
+
+          if (lastModifiedHeader) {
+            const buildDate = new Date(lastModifiedHeader);
+
+            // Format to YYYYMMDD-HHMM
+            const year = buildDate.getFullYear();
+            const month = String(buildDate.getMonth() + 1).padStart(2, "0");
+            const day = String(buildDate.getDate()).padStart(2, "0");
+            const hours = String(buildDate.getHours()).padStart(2, "0");
+            const mins = String(buildDate.getMinutes()).padStart(2, "0");
+
+            const buildStamp = `${year}${month}${day}-${hours}${mins}`;
+            versionBadge.textContent = `${envTag}:${buildStamp}`;
+          } else {
+            versionBadge.textContent = `${envTag}:Live`;
+          }
+        } catch (err) {
+          versionBadge.textContent = `${envTag}:Offline`;
+        }
+      });
+    </script>
   </body>
 </html>
