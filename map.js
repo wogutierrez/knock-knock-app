@@ -1,15 +1,19 @@
 // ==========================================================
-// MAP INITIALIZATION & TILE SETUP
+// MAP INITIALIZATION & ESRI SATELLITE TILE SETUP
 // ==========================================================
 // Initialize Leaflet instance on #map
 const map = L.map("map").setView([0, 0], 2);
 window.map = map;
 
-// Load OpenStreetMap Tiles
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  attribution: "© OpenStreetMap contributors"
-}).addTo(map);
+// Load Esri World Imagery
+L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+    maxZoom: 19,
+    attribution:
+      "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
+  }
+).addTo(map);
 
 // ==========================================================
 // GPS AUTO-CENTER & RE-CENTER LOGIC
@@ -35,7 +39,7 @@ function recenterToUserLocation() {
           });
         }
 
-        // Create or reposition custom blue marker
+        // Create or reposition custom blue GPS location marker
         if (window.userLocationMarker) {
           window.userLocationMarker.setLatLng([latitude, longitude]);
         } else if (window.map) {
@@ -72,7 +76,7 @@ if (recenterBtn) {
   recenterBtn.addEventListener("click", recenterToUserLocation);
 }
 
-// Auto-run location request as soon as DOM content finishes loading
+// Auto-run location request on page open
 document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     recenterToUserLocation();
