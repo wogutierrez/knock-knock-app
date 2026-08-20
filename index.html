@@ -432,7 +432,22 @@
           navigator.serviceWorker
             .register("./sw.js", { scope: "./" })
             .then((reg) => {
-              // Check for SW updates every time the app opens
+              // Send message to SW asking for version string
+              if (reg.active) {
+                const channel = new MessageChannel();
+                channel.port1.onmessage = (event) => {
+                  if (event.data && event.data.version) {
+                    const versionBadge = document.getElementById("app-version");
+                    if (versionBadge)
+                      versionBadge.textContent = event.data.version;
+                  }
+                };
+                reg.active.postMessage({ action: "GET_VERSION" }, [
+                  channel.port2
+                ]);
+              }
+
+              // Handle automatic reload when a new version deploys
               reg.onupdatefound = () => {
                 const installingWorker = reg.installing;
                 installingWorker.onstatechange = () => {
@@ -440,7 +455,6 @@
                     installingWorker.state === "installed" &&
                     navigator.serviceWorker.controller
                   ) {
-                    // New update available -> Auto reload page to apply changes
                     window.location.reload();
                   }
                 };

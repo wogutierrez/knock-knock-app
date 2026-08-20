@@ -66,3 +66,10 @@ self.addEventListener("fetch", (e) => {
       .catch(() => caches.match(e.request)) // Fallback to cached version if offline
   );
 });
+
+// Listen for version request from index.html
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.action === "GET_VERSION") {
+    event.ports[0].postMessage({ version: CACHE_NAME });
+  }
+});
