@@ -424,46 +424,6 @@
     <script src="map.js"></script>
     <script src="settings.js"></script>
     <script src="app.js"></script>
-
-    <!-- 4. Service Worker Registration -->
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("./sw.js", { scope: "./" })
-            .then((reg) => {
-              // Send message to SW asking for version string
-              if (reg.active) {
-                const channel = new MessageChannel();
-                channel.port1.onmessage = (event) => {
-                  if (event.data && event.data.version) {
-                    const versionBadge = document.getElementById("app-version");
-                    if (versionBadge)
-                      versionBadge.textContent = event.data.version;
-                  }
-                };
-                reg.active.postMessage({ action: "GET_VERSION" }, [
-                  channel.port2
-                ]);
-              }
-
-              // Handle automatic reload when a new version deploys
-              reg.onupdatefound = () => {
-                const installingWorker = reg.installing;
-                installingWorker.onstatechange = () => {
-                  if (
-                    installingWorker.state === "installed" &&
-                    navigator.serviceWorker.controller
-                  ) {
-                    window.location.reload();
-                  }
-                };
-              };
-            })
-            .catch((err) => console.error("SW Registration failed:", err));
-        });
-      }
-    </script>
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
         const versionBadge = document.getElementById("app-version");
