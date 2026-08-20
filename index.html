@@ -111,9 +111,34 @@
 
       <!-- TAB VIEW 2: HOUSE VISIT RECORDS LIST -->
       <div id="tab-records" class="w-full h-full p-4 overflow-y-auto hidden">
-        <div class="flex justify-between items-center mb-4">
+        <div
+          class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2"
+        >
           <h2 class="text-xl font-bold text-white">House Visit Records</h2>
+
+          <!-- Grouping & Sorting Controls -->
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <select
+              id="filter-territory"
+              onchange="window.filterRecords()"
+              class="bg-slate-800 border border-slate-700 text-xs rounded p-2 text-white focus:outline-none focus:border-emerald-500 flex-1 sm:flex-none"
+            >
+              <option value="ALL">All Territories</option>
+            </select>
+            <select
+              id="filter-status"
+              onchange="window.filterRecords()"
+              class="bg-slate-800 border border-slate-700 text-xs rounded p-2 text-white focus:outline-none focus:border-emerald-500 flex-1 sm:flex-none"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="Not at Home">🔴 Not at Home</option>
+              <option value="Preached">🟢 Preached</option>
+              <option value="Return Visit">🔵 Return Visit</option>
+              <option value="Bible Study">🟡 Bible Study</option>
+            </select>
+          </div>
         </div>
+
         <div id="records-container" class="space-y-3">
           <div class="text-slate-400 text-center py-10 text-sm">
             No houses logged yet. Tap any house roof on the map to add a visit!
