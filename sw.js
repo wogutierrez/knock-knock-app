@@ -1,90 +1,68 @@
-const APP_SHELL_CACHE = "knock-knock-v3";
+const CACHE_NAME = "knock-knock-app-v1";
 const TILE_CACHE = "esri-satellite-cache-v1";
 
-const APP_ASSETS = [
-  "./",
-  "./index.html",
-  "./style.css",
-  "./map.js",
-  "./records.js",
-  "./settings.js",
-  "./app.js",
-  "./manifest.json"
-];
-
-// 1. Install Event: Pre-cache App Shell
+// 1. Install & Activate immediately without waiting for old tabs to close
 self.addEventListener("install", (e) => {
   self.skipWaiting();
-  e.waitUntil(
-    caches.open(APP_SHELL_CACHE).then((cache) => {
-      return cache.addAll(APP_ASSETS);
-    })
-  );
 });
 
-// 2. Activate Event: Clean up old cache versions
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== APP_SHELL_CACHE && cache !== TILE_CACHE) {
-            return caches.delete(cache);
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME && key !== TILE_CACHE) {
+            return caches.delete(key);
           }
         })
-      );
-    })
+      )
+    )
   );
   self.clients.claim();
 });
 
-// 3. Fetch Event: Intercept app requests & auto-cache satellite tiles
+// 2. Fetch Strategy: Network-First for HTML/JS (Fresh code), Cache-First for Satellite Maps
 self.addEventListener("fetch", (e) => {
   const url = e.request.url;
 
-  // Intercept Esri Tile Requests for Auto-Caching
+  // Esri Map Satellite Tiles (Cache First for offline map performance)
   if (
     url.includes(
       "server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile"
     )
   ) {
     e.respondWith(
-      caches.open(TILE_CACHE).then((cache) => {
-        return cache.match(e.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            // Serve cached tile immediately, refresh in background when online
-            fetch(e.request)
-              .then((networkResponse) => {
-                if (networkResponse && networkResponse.status === 200) {
-                  cache.put(e.request, networkResponse.clone());
-                }
-              })
-              .catch(() => {
-                /* Silence network errors when offline */
-              });
-
-            return cachedResponse;
-          }
-
-          // Fetch from network, cache, and return
-          return fetch(e.request)
-            .then((networkResponse) => {
-              if (networkResponse && networkResponse.status === 200) {
-                cache.put(e.request, networkResponse.clone());
-              }
-              return networkResponse;
-            })
-            .catch((err) => console.error("Offline tile missing:", err));
-        });
-      })
+      caches.open(TILE_CACHE).then((cache) =>
+        cache.match(e.request).then((cached) => {
+          if (cached) return cached;
+          return fetch(e.request).then((networkRes) => {
+            if (networkRes && networkRes.status === 200) {
+              cache.put(e.request, networkRes.clone());
+            }
+            return networkRes;
+          });
+        })
+      )
     );
     return;
   }
 
-  // General App Assets (Cache First with Network Fallback)
+  // App Shell (HTML/JS/CSS): Network-First to guarantee latest code when online
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      return cachedResponse || fetch(e.request);
-    })
+    fetch(e.request)
+      .then((networkRes) => {
+        if (
+          networkRes &&
+          networkRes.status === 200 &&
+          e.request.method === "GET"
+        ) {
+          const resClone = networkRes.clone();
+          caches
+            .open(CACHE_NAME)
+            .then((cache) => cache.put(e.request, resClone));
+        }
+        return networkRes;
+      })
+      .catch(() => caches.match(e.request)) // Fallback to cached version if offline
   );
 });
