@@ -118,4 +118,17 @@ document.addEventListener("DOMContentLoaded", () => {
       window.activeTempCoords = null;
     });
   }
+
+  // --- AUTO-CENTER ON LAUNCH ---
+  // Automatically triggers the floating GPS re-center button as soon as the app loads
+  setTimeout(() => {
+    const locateBtn =
+      document.getElementById("btn-recenter") ||
+      document.getElementById("btn-locate");
+    if (locateBtn) {
+      locateBtn.click();
+    } else if (typeof window.centerOnUser === "function") {
+      window.centerOnUser();
+    }
+  }, 300);
 });
