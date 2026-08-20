@@ -37,7 +37,8 @@ let activeTempCoords = null;
 
 // --- 3. ROOF TAP EVENT LISTENER ---
 map.on("click", (e) => {
-  activeTempCoords = e.latlng;
+  window.activeTempCoords = e.latlng;
+
   const visitModal = document.getElementById("visit-modal");
   if (visitModal) visitModal.classList.remove("hidden");
 });
