@@ -1,34 +1,21 @@
-// Initialize map globally on the window object
-window.map = L.map("map").setView([-17.8252, 31.0335], 16);
+// ==========================================================
+// MAP INITIALIZATION & TILE SETUP
+// ==========================================================
+// Initialize Leaflet instance on #map
+const map = L.map("map").setView([0, 0], 2);
+window.map = map;
 
-// Satellite Tile Layer (Esri)
-L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  {
-    maxZoom: 19,
-    attribution: "Tiles &copy; Esri"
-  }
-).addTo(window.map);
+// Load OpenStreetMap Tiles
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  attribution: "© OpenStreetMap contributors"
+}).addTo(map);
 
-// --- ROOF TAP EVENT LISTENER ---
-window.map.on("click", (e) => {
-  window.activeTempCoords = e.latlng;
-
-  // Execute populator safely across Android Chrome & Desktop Windows
-  if (typeof window.populateModalDefaults === "function") {
-    window.populateModalDefaults();
-  }
-
-  const visitModal = document.getElementById("visit-modal");
-  if (visitModal) {
-    visitModal.classList.remove("hidden");
-  }
-});
-
-// --- GPS RE-CENTER LOGIC ---
+// ==========================================================
+// GPS AUTO-CENTER & RE-CENTER LOGIC
+// ==========================================================
 const recenterBtn = document.getElementById("recenter-btn");
 
-// 1. Standalone function containing the exact location logic
 function recenterToUserLocation() {
   if ("geolocation" in navigator) {
     if (recenterBtn) recenterBtn.classList.add("opacity-50");
@@ -38,17 +25,17 @@ function recenterToUserLocation() {
         const { latitude, longitude } = position.coords;
 
         if (window.map) {
-          // Smoothly fly map to user's exact coordinates
+          // Re-calculate map container bounds
+          window.map.invalidateSize();
+
+          // Fly map smoothly to GPS location
           window.map.flyTo([latitude, longitude], 18, {
             animate: true,
             duration: 1.5
           });
-
-          // Ensure map recalculates tile layout after flyTo
-          window.map.invalidateSize();
         }
 
-        // Create or move user location marker
+        // Create or reposition custom blue marker
         if (window.userLocationMarker) {
           window.userLocationMarker.setLatLng([latitude, longitude]);
         } else if (window.map) {
@@ -80,14 +67,13 @@ function recenterToUserLocation() {
   }
 }
 
-// 2. Attach to button click
+// Bind button event
 if (recenterBtn) {
   recenterBtn.addEventListener("click", recenterToUserLocation);
 }
 
-// 3. Trigger automatically on page open
+// Auto-run location request as soon as DOM content finishes loading
 document.addEventListener("DOMContentLoaded", () => {
-  // Small delay allows Leaflet container to fully render first
   setTimeout(() => {
     recenterToUserLocation();
   }, 300);
