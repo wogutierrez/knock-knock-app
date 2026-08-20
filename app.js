@@ -54,8 +54,10 @@ document.addEventListener("DOMContentLoaded", () => {
       btnEl.classList.remove("text-slate-400");
       btnEl.classList.add("bg-emerald-600", "text-white");
 
-      if (tab.view === "tab-map" && typeof map !== "undefined") {
-        setTimeout(() => map.invalidateSize(), 100);
+      if (tab.view === "tab-map" && typeof window.map !== "undefined") {
+        requestAnimationFrame(() => {
+          setTimeout(() => window.map.invalidateSize(), 150);
+        });
       }
     });
   });

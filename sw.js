@@ -1,8 +1,25 @@
 const CACHE_NAME = "knock-knock-app-v1";
 const TILE_CACHE = "esri-satellite-cache-v1";
 
-// 1. Install & Activate immediately without waiting for old tabs to close
+const APP_ASSETS = [
+  "./",
+  "./index.html",
+  "./style.css",
+  "./records.js",
+  "./settings.js",
+  "./app.js",
+  "./map.js",
+  "./manifest.json",
+  "https://cdn.tailwindcss.com",
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
+  "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+];
+
+// 1. Install & Activate immediately with pre-cached assets
 self.addEventListener("install", (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_ASSETS))
+  );
   self.skipWaiting();
 });
 
