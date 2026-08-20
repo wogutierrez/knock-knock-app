@@ -425,6 +425,16 @@
     <script src="settings.js"></script>
     <script src="app.js"></script>
     <script>
+      // 1. Register Service Worker cleanly
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./sw.js", { scope: "./" })
+            .catch((err) => console.error("SW Registration failed:", err));
+        });
+      }
+
+      // 2. Deployment Timestamp Badge
       document.addEventListener("DOMContentLoaded", async () => {
         const versionBadge = document.getElementById("app-version");
         if (!versionBadge) return;
@@ -435,25 +445,26 @@
         const envTag = isDev ? "DEV" : "PROD";
 
         try {
-          // Perform a lightweight HEAD request to fetch file deployment headers
-          const res = await fetch(window.location.href, {
+          // Force fresh headers from Cloudflare edge without cache
+          const res = await fetch(window.location.href + "?v=" + Date.now(), {
             method: "HEAD",
             cache: "no-store"
           });
-          const lastModifiedHeader = res.headers.get("Last-Modified");
 
-          if (lastModifiedHeader) {
-            const buildDate = new Date(lastModifiedHeader);
+          // Try Last-Modified first, then fall back to Cloudflare Edge Date header
+          const rawHeader =
+            res.headers.get("Last-Modified") || res.headers.get("Date");
 
-            // Format to YYYYMMDD-HHMM
+          if (rawHeader) {
+            const buildDate = new Date(rawHeader);
+
             const year = buildDate.getFullYear();
             const month = String(buildDate.getMonth() + 1).padStart(2, "0");
             const day = String(buildDate.getDate()).padStart(2, "0");
             const hours = String(buildDate.getHours()).padStart(2, "0");
             const mins = String(buildDate.getMinutes()).padStart(2, "0");
 
-            const buildStamp = `${year}${month}${day}-${hours}${mins}`;
-            versionBadge.textContent = `${envTag}:${buildStamp}`;
+            versionBadge.textContent = `${envTag}:${year}${month}${day}-${hours}${mins}`;
           } else {
             versionBadge.textContent = `${envTag}:Live`;
           }
