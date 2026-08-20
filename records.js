@@ -41,25 +41,71 @@ function loadRecords() {
 }
 
 /**
+ * Populate the Territory Filter Dropdown dynamically based on logged records
+ */
+function populateTerritoryDropdown() {
+  const dropdown = document.getElementById("filter-territory");
+  if (!dropdown) return;
+
+  const currentSelection = dropdown.value;
+  const territories = [
+    ...new Set(visitRecords.map((r) => r.territory || "Unassigned"))
+  ];
+
+  dropdown.innerHTML =
+    '<option value="ALL">All Territories</option>' +
+    territories
+      .map((t) => `<option value="${t}">Territory ${t}</option>`)
+      .join("");
+
+  if (territories.includes(currentSelection)) {
+    dropdown.value = currentSelection;
+  }
+}
+
+/**
+ * Filter records by selected Territory and Visit Status
+ */
+window.filterRecords = function () {
+  const selectedTerritory =
+    document.getElementById("filter-territory")?.value || "ALL";
+  const selectedStatus =
+    document.getElementById("filter-status")?.value || "ALL";
+
+  const filtered = visitRecords.filter((rec) => {
+    const matchesTerritory =
+      selectedTerritory === "ALL" ||
+      (rec.territory || "Unassigned") === selectedTerritory;
+    const matchesStatus =
+      selectedStatus === "ALL" || rec.status === selectedStatus;
+    return matchesTerritory && matchesStatus;
+  });
+
+  renderRecordsList(filtered);
+};
+
+/**
  * 3. Render the house visit records UI list
  */
-function renderRecordsList() {
+function renderRecordsList(recordsToRender = visitRecords) {
   const container = document.getElementById("records-container");
   const counter = document.getElementById("tab-count");
 
   if (counter) counter.innerText = visitRecords.length;
   if (!container) return;
 
-  if (visitRecords.length === 0) {
+  populateTerritoryDropdown();
+
+  if (recordsToRender.length === 0) {
     container.innerHTML = `
       <div class="text-slate-400 text-center py-10 text-sm">
-        No houses logged yet. Tap any house roof on the map to add a visit!
+        No houses found matching your criteria. Tap any house roof on the map to add a visit!
       </div>
     `;
     return;
   }
 
-  container.innerHTML = visitRecords
+  container.innerHTML = recordsToRender
     .map(
       (rec) => `
     <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl flex justify-between items-center shadow-sm">
@@ -76,7 +122,20 @@ function renderRecordsList() {
                         : "bg-red-600"
                 }">${rec.status}</span>
             </div>
-            <p class="text-xs text-slate-400 mt-1">Publisher: ${rec.publisher || "N/A"}</p>
+            
+            <div class="flex flex-wrap gap-1.5 mt-2">
+                <span class="text-[10px] bg-slate-900 text-emerald-400 border border-slate-700 px-2 py-0.5 rounded font-mono">
+                  🏰 ${rec.congregation || "N/A"}
+                </span>
+                <span class="text-[10px] bg-slate-900 text-slate-300 border border-slate-700 px-2 py-0.5 rounded font-mono">
+                  👥 Grp: ${rec.group || "N/A"}
+                </span>
+                <span class="text-[10px] bg-slate-900 text-yellow-400 border border-slate-700 px-2 py-0.5 rounded font-mono">
+                  📍 Terr: ${rec.territory || "N/A"}
+                </span>
+            </div>
+
+            <p class="text-xs text-slate-400 mt-2">Publisher: ${rec.publisher || "N/A"}</p>
             <p class="text-[10px] text-slate-500 mt-0.5">📅 ${rec.date}</p>
         </div>
         <div class="flex items-center space-x-2 flex-shrink-0">
@@ -106,13 +165,13 @@ function addPinToMap(rec) {
   let bgStyle = "background-color: #ef4444; border-color: #ffffff;";
 
   if (rec.status === "Preached") {
-    iconEmoji = "✅";
+    iconEmoji = "🟢";
     bgStyle = "background-color: #10b981; border-color: #ffffff;";
   } else if (rec.status === "Return Visit") {
-    iconEmoji = "⏰";
+    iconEmoji = "🔵";
     bgStyle = "background-color: #3b82f6; border-color: #ffffff;";
   } else if (rec.status === "Bible Study") {
-    iconEmoji = "📖";
+    iconEmoji = "🟡";
     bgStyle = "background-color: #eab308; border-color: #ffffff;";
   }
 
@@ -128,7 +187,8 @@ function addPinToMap(rec) {
     .bindPopup(`
       <div style="color: #0f172a; font-family: sans-serif;">
           <b style="font-size: 14px;">${iconEmoji} ${rec.status}</b><br>
-          <span>Householder: ${rec.person || "N/A"}</span><br>
+          <span><b>Householder:</b> ${rec.person || "N/A"}</span><br>
+          <small style="color: #475569;">Territory #${rec.territory || "N/A"} (${rec.group || "N/A"})</small><br>
           <small style="color: #64748b;">Logged by ${rec.publisher || "Unknown"} on ${rec.date}</small>
           <br><br>
           <button onclick="window.deletePin(${rec.id})" 
