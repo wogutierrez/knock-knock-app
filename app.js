@@ -24,7 +24,50 @@ window.populateModalDefaults = function () {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Tab navigation setup
+  // --- DIRECT OPEN ON MAP VIEW ---
+  const views = ["tab-map", "tab-records", "tab-settings", "tab-about"];
+  const buttons = [
+    "btn-tab-map",
+    "btn-tab-records",
+    "btn-tab-settings",
+    "btn-tab-about"
+  ];
+
+  // Hide all views except the map tab
+  views.forEach((v) => {
+    const el = document.getElementById(v);
+    if (el) {
+      if (v === "tab-map") {
+        el.classList.remove("hidden");
+      } else {
+        el.classList.add("hidden");
+      }
+    }
+  });
+
+  // Set the map nav button active styling
+  buttons.forEach((b) => {
+    const btn = document.getElementById(b);
+    if (btn) {
+      if (b === "btn-tab-map") {
+        btn.classList.remove("text-slate-400");
+        btn.classList.add("bg-emerald-600", "text-white");
+      } else {
+        btn.classList.remove("bg-emerald-600", "text-white");
+        btn.classList.add("text-slate-400");
+      }
+    }
+  });
+
+  // Ensure Leaflet container recalculates size on immediate open
+  const checkMapInstance = setInterval(() => {
+    if (typeof window.map !== "undefined" && window.map !== null) {
+      clearInterval(checkMapInstance);
+      window.map.invalidateSize();
+    }
+  }, 100);
+
+  // --- TAB NAVIGATION SETUP ---
   const tabs = [
     { btn: "btn-tab-map", view: "tab-map" },
     { btn: "btn-tab-records", view: "tab-records" },
@@ -62,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Modal Form Handling
+  // --- MODAL FORM HANDLING ---
   const visitForm = document.getElementById("visit-form");
   const visitModal = document.getElementById("visit-modal");
   const closeModalBtn = document.getElementById("close-modal");
@@ -118,17 +161,4 @@ document.addEventListener("DOMContentLoaded", () => {
       window.activeTempCoords = null;
     });
   }
-
-  // --- AUTO-CENTER ON LAUNCH ---
-  // Automatically triggers the floating GPS re-center button as soon as the app loads
-  setTimeout(() => {
-    const locateBtn =
-      document.getElementById("btn-recenter") ||
-      document.getElementById("btn-locate");
-    if (locateBtn) {
-      locateBtn.click();
-    } else if (typeof window.centerOnUser === "function") {
-      window.centerOnUser();
-    }
-  }, 300);
 });
