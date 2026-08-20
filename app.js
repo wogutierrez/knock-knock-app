@@ -1,7 +1,30 @@
+// Global namespace for storage key constants to prevent typos across Android & Windows
+window.KK_KEYS = {
+  PUBLISHER: "kk_default_publisher",
+  CONGREGATION: "kk_default_congregation",
+  GROUP: "kk_default_group",
+  TERRITORY: "kk_default_territory"
+};
+
+// Instantly available global function
+window.populateModalDefaults = function () {
+  const pubInput = document.getElementById("publisher-name");
+  const congInput = document.getElementById("visit-congregation");
+  const grpInput = document.getElementById("visit-group");
+  const terrInput = document.getElementById("visit-territory");
+
+  if (pubInput)
+    pubInput.value = localStorage.getItem(window.KK_KEYS.PUBLISHER) || "";
+  if (congInput)
+    congInput.value = localStorage.getItem(window.KK_KEYS.CONGREGATION) || "";
+  if (grpInput)
+    grpInput.value = localStorage.getItem(window.KK_KEYS.GROUP) || "";
+  if (terrInput)
+    terrInput.value = localStorage.getItem(window.KK_KEYS.TERRITORY) || "";
+};
+
 document.addEventListener("DOMContentLoaded", () => {
-  // ==========================================
-  // 1. NAVIGATION TAB SWITCHER
-  // ==========================================
+  // Tab navigation setup
   const tabs = [
     { btn: "btn-tab-map", view: "tab-map" },
     { btn: "btn-tab-records", view: "tab-records" },
@@ -37,33 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Helper function: Load saved default settings into the visit modal form
-  const populateModalDefaults = () => {
-    const pubInput = document.getElementById("publisher-name");
-    const congInput = document.getElementById("visit-congregation");
-    const grpInput = document.getElementById("visit-group");
-    const terrInput = document.getElementById("visit-territory");
-
-    if (pubInput)
-      pubInput.value = localStorage.getItem("kk_default_publisher") || "";
-    if (congInput)
-      congInput.value = localStorage.getItem("kk_default_congregation") || "";
-    if (grpInput)
-      grpInput.value = localStorage.getItem("kk_default_group") || "";
-    if (terrInput)
-      terrInput.value = localStorage.getItem("kk_default_territory") || "";
-  };
-
-  // Attach populator to map click event
-  if (typeof map !== "undefined") {
-    map.on("click", () => {
-      populateModalDefaults();
-    });
-  }
-
-  // ==========================================
-  // 2. MODAL FORM SUBMIT & SAVING HANDLER
-  // ==========================================
+  // Modal Form Handling
   const visitForm = document.getElementById("visit-form");
   const visitModal = document.getElementById("visit-modal");
   const closeModalBtn = document.getElementById("close-modal");
@@ -79,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (visitForm) {
     visitForm.addEventListener("submit", (e) => {
-      e.preventDefault(); // Stop default form submit page reload
+      e.preventDefault();
 
       if (!window.activeTempCoords) {
         alert("Please tap a house location on the map first.");
@@ -98,22 +95,21 @@ document.addEventListener("DOMContentLoaded", () => {
         id: Date.now(),
         lat: window.activeTempCoords.lat,
         lng: window.activeTempCoords.lng,
-        congregation: congregationInput ? congregationInput.value : "N/A",
-        group: groupInput ? groupInput.value : "N/A",
-        territory: territoryInput ? territoryInput.value : "N/A",
-        publisher: publisherInput ? publisherInput.value : "Anonymous",
+        congregation: congregationInput ? congregationInput.value.trim() : "",
+        group: groupInput ? groupInput.value.trim() : "",
+        territory: territoryInput ? territoryInput.value.trim() : "",
+        publisher: publisherInput ? publisherInput.value.trim() : "",
         person:
-          personInput && personInput.value ? personInput.value : "House Visit",
-        phone: phoneInput ? phoneInput.value : "",
+          personInput && personInput.value
+            ? personInput.value.trim()
+            : "House Visit",
+        phone: phoneInput ? phoneInput.value.trim() : "",
         status: statusInput ? statusInput.value : "Not at Home",
         date: new Date().toLocaleDateString()
       };
 
-      // Call global save method from records.js
       if (typeof window.addNewVisit === "function") {
         window.addNewVisit(newRecord);
-      } else {
-        console.error("window.addNewVisit function is missing!");
       }
 
       hideModal();
