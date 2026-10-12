@@ -136,8 +136,8 @@ function renderRecordsList(recordsToRender = visitRecords) {
             </div>
 
             <p class="text-xs text-slate-400 mt-2">Publisher: ${rec.publisher || "N/A"}</p>
-            <p class="text-[10px] text-slate-500 mt-0.5">📅 ${rec.date}</p>
-            <p class="text-[10px] text-slate-500 mt-0.5"> ${rec.notes}</p>
+            <p class="text-[10px] text-slate-500 mt-0.5">Date: 📅 ${rec.date}</p>
+            <p class="text-[10px] text-slate-500 mt-0.5"> Notes: 📝 ${rec.notes || "None"}</p>
         </div>
         <div class="flex items-center space-x-2 flex-shrink-0">
           ${
