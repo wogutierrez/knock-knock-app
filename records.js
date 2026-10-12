@@ -255,3 +255,56 @@ document.addEventListener("DOMContentLoaded", () => {
   renderRecordsList();
   setTimeout(recreatePins, 400);
 });
+
+// Populate Group Filter in Records Tab & handle cascading territory options
+  window.populateRecordsGroupFilter = function() {
+    const groupFilterEl = document.getElementById("filter-group");
+    if (!groupFilterEl) return;
+
+    const groups = (localStorage.getItem("kk_master_groups") || "Haydon, Fairview").split(",").map(s => s.trim()).filter(Boolean);
+    const currentVal = groupFilterEl.value;
+
+    groupFilterEl.innerHTML = '<option value="ALL">All Groups</option>';
+    groups.forEach(g => {
+      const opt = document.createElement("option");
+      opt.value = g;
+      opt.textContent = `Group: ${g}`;
+      groupFilterEl.appendChild(opt);
+    });
+    groupFilterEl.value = currentVal || "ALL";
+  };
+
+  // When Group filter changes in Records view, update the Territory filter options for that group
+  window.onGroupFilterChanged = function() {
+    const groupFilterEl = document.getElementById("filter-group");
+    const terrFilterEl = document.getElementById("filter-territory");
+    if (!groupFilterEl || !terrFilterEl) return;
+
+    const selectedGroup = groupFilterEl.value;
+    const mapping = window.getGroupTerritoryMap();
+
+    terrFilterEl.innerHTML = '<option value="ALL">All Territories</option>';
+
+    if (selectedGroup === "ALL") {
+      // Show all territories across all groups
+      let allTerrs = [];
+      Object.values(mapping).forEach(arr => { allTerrs = allTerrs.concat(arr); });
+      [...new Set(allTerrs)].forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = `Territory ${t}`;
+        terrFilterEl.appendChild(opt);
+      });
+    } else {
+      // Show only territories belonging to the selected group
+      const groupTerrs = mapping[selectedGroup] || [];
+      groupTerrs.forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = `Territory ${t}`;
+        terrFilterEl.appendChild(opt);
+      });
+    }
+
+    window.filterRecords();
+  };
