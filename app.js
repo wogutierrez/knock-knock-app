@@ -114,6 +114,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const hideModal = () => {
     if (visitModal) visitModal.classList.add("hidden");
     if (visitForm) visitForm.reset();
+
+    // Bring the "My Location button"
+    const recenterBtn = document.getElementById("recenter-btn");
+    if (recenterBtn) recenterBtn.style.display = "flex";
   };
 
   if (closeModalBtn) closeModalBtn.addEventListener("click", hideModal);
