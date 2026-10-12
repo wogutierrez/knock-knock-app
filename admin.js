@@ -85,27 +85,34 @@ document.addEventListener("DOMContentLoaded", () => {
     return mapping;
   };
 
-  // Populate Dropdowns & Handle Hierarchical Dependent Changes
   // Populate all dynamic dropdowns across the app
   window.populateAllDropdowns = function() {
     const congs = (localStorage.getItem("kk_master_congregations") || "Goodhope English").split(",").map(s => s.trim()).filter(Boolean);
     const groups = (localStorage.getItem("kk_master_groups") || "Haydon, Fairview").split(",").map(s => s.trim()).filter(Boolean);
     
-    // 1. Populate Congregation Dropdown
+    // 1. Lock/Set the Congregation in settings form automatically to the first official admin congregation
+    const defaultCongInput = document.getElementById("default-congregation-input");
+    if (defaultCongInput && congs.length > 0) {
+      defaultCongInput.value = congs[0];
+      defaultCongInput.setAttribute("readonly", true); // Lock it down to admin setting
+      defaultCongInput.classList.add("bg-slate-950", "text-slate-400", "cursor-not-allowed");
+    }
+
+    // 2. Populate Visit Modal Congregation (Locked to official congregation)
     populateSelect("visit-congregation", congs);
 
-    // 2. Populate Group Dropdown
+    // 3. Populate Visit Modal Group (Strictly from approved admin list)
     populateSelect("visit-group", groups);
 
-    // 3. Populate Records Tab Group Filter
+    // 4. Populate Records Tab Group Filter
     if (typeof window.populateRecordsGroupFilter === "function") {
       window.populateRecordsGroupFilter();
     }
 
-    // 4. Update territory dropdowns based on group selection
+    // 5. Update territory dropdowns based on group selection
     updateTerritoryDropdownForGroup();
 
-    // 5. Populate Records Filter Territory Dropdown (shows all territories initially)
+    // 6. Populate Records Filter Territory Dropdown
     const filterTerrSelect = document.getElementById("filter-territory");
     if (filterTerrSelect) {
       const currentVal = filterTerrSelect.value;
