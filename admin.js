@@ -43,8 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Save Master Settings & Sync to Firestore
+  // Save Master Settings & Sync to Firestore
   if (saveAdminBtn) {
-    saveAdminBtn.addEventListener("click", () => {
+    saveAdminBtn.addEventListener("click", async () => {
       const congsVal = congInput ? congInput.value.trim() : "";
       const groupsVal = groupInput ? groupInput.value.trim() : "";
       const groupTerrVal = groupTerrInput ? groupTerrInput.value.trim() : "";
@@ -53,16 +54,20 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("kk_master_groups", groupsVal);
       localStorage.setItem("kk_master_group_territories", groupTerrVal);
 
-      // Package configuration object for Firestore cloud sync
-      const masterConfig = {
-        congregations: congsVal,
-        groups: groupsVal,
-        groupTerritories: groupTerrVal,
-        updatedAt: new Date().toISOString()
-      };
-      localStorage.setItem("kk_master_config_json", JSON.stringify(masterConfig));
+      alert("Master settings saved locally! Syncing to cloud...");
 
-      alert("Master settings saved successfully! Dropdowns updated.");
+      // Automatically sync to cloud if a passphrase is saved/entered
+      const passInput = document.getElementById("sync-passphrase-input");
+      const passphrase = passInput ? passInput.value.trim() : "";
+
+      if (passphrase && typeof window.backupToCloud === "function") {
+        const success = await window.backupToCloud(passphrase);
+        if (success) {
+          alert("✓ Master settings successfully synced to the cloud for all publishers!");
+        }
+      } else {
+        alert("Master settings saved! (Note: Enter your sync passphrase in the Cloud Backup section above to push these updates to other brothers).");
+      }
       
       if (typeof window.populateAllDropdowns === "function") {
         window.populateAllDropdowns();
