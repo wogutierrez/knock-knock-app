@@ -113,13 +113,21 @@
 
       <!-- TAB VIEW 2: HOUSE VISIT RECORDS LIST -->
       <div id="tab-records" class="w-full h-full p-4 overflow-y-auto hidden">
-        <div
-          class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2"
-        >
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
           <h2 class="text-xl font-bold text-white">Territory Backlog & Coverage</h2>
 
-          <!-- Territory & Sorting Controls (No Status Filter) -->
-          <div class="flex items-center gap-2 w-full sm:w-auto">
+          <!-- Group, Territory & Sorting Controls -->
+          <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+            <!-- Group Filter -->
+            <select
+              id="filter-group"
+              onchange="window.onGroupFilterChanged()"
+              class="bg-slate-800 border border-slate-700 text-xs rounded p-2 text-white focus:outline-none focus:border-emerald-500 flex-1 sm:flex-none"
+            >
+              <option value="ALL">All Groups</option>
+            </select>
+
+            <!-- Territory Filter -->
             <select
               id="filter-territory"
               onchange="window.filterRecords()"
@@ -127,6 +135,8 @@
             >
               <option value="ALL">All Territories</option>
             </select>
+
+            <!-- Sort Order Selector -->
             <select
               id="sort-order"
               onchange="window.filterRecords()"
