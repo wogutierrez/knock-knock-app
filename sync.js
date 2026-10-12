@@ -1,4 +1,27 @@
 // ==========================================
+// AUTO-PURGE OLD CACHES & SERVICE WORKERS
+// ==========================================
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for(let registration of registrations) {
+      registration.unregister();
+      console.log("Old service worker unregistered to prevent caching bugs.");
+    }
+  });
+}
+
+// Clear outdated browser caches on startup
+if ('caches' in window) {
+  caches.keys().then(function(names) {
+    for (let name of names) {
+      caches.delete(name);
+      console.log("Deleted old cache:", name);
+    }
+  });
+}
+
+
+// ==========================================
 // FIREBASE CLOUD SYNC & PASSPHRASE BACKUP
 // ==========================================
 
