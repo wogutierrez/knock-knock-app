@@ -31,6 +31,9 @@ async function hashPassphrase(passphrase) {
 /**
  * Backup local visit records and admin master settings to Firebase using passphrase
  */
+/**
+ * Backup local visit records and admin master settings to Firebase using passphrase
+ */
 window.backupToCloud = async function(passphrase) {
   if (!passphrase || passphrase.trim().length < 4) {
     alert("Please enter a valid passphrase (at least 4 characters).");
@@ -41,7 +44,7 @@ window.backupToCloud = async function(passphrase) {
     const hashKey = await hashPassphrase(passphrase);
     const records = JSON.parse(localStorage.getItem("knock-knock-visits") || "[]");
     
-    // Grab organizer's approved master settings from localStorage
+    // Grab the exact master configuration keys used by admin.js
     const masterCongregations = localStorage.getItem("kk_master_congregations") || "";
     const masterGroups = localStorage.getItem("kk_master_groups") || "";
     const masterGroupTerritories = localStorage.getItem("kk_master_group_territories") || "";
