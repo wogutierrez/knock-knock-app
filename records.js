@@ -149,6 +149,10 @@ function renderRecordsList(recordsToRender = visitRecords) {
               🗑️
           </button>
         </div>
+        <!-- ADD THIS NOTES LINE -->
+            ${rec.notes ? `<p class="text-xs bg-slate-900/60 text-slate-300 border border-slate-700/60 p-2 rounded mt-2 italic">📝 "${rec.notes}"</p>` : ""}
+
+            <p class="text-xs text-slate-400 mt-2">Publisher: ${rec.publisher || "N/A"}</p>
     </div>
 `
     )
