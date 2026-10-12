@@ -25,6 +25,22 @@ document.addEventListener("DOMContentLoaded", () => {
       "Haydon: 001, 002\nFairview: 003, 004";
   }
 
+  // Inject a dedicated admin sync passphrase input right into the admin panel if not already present
+  if (adminPanelView && !document.getElementById("admin-sync-passphrase")) {
+    const syncPassDiv = document.createElement("div");
+    syncPassDiv.className = "mt-4 pt-4 border-t border-slate-800";
+    syncPassDiv.innerHTML = `
+      <label class="block text-xs font-medium text-slate-400 mb-1">CLOUD SYNC PASSPHRASE (FOR PUSHING TO ALL BROTHERS)</label>
+      <input type="password" id="admin-sync-passphrase" placeholder="Enter shared passphrase..." 
+        value="${localStorage.getItem("kk_last_passphrase") || ""}"
+        class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono" />
+      <p class="text-[10px] text-slate-500 mt-1">When you save master settings, this passphrase is used to sync updates to the cloud automatically.</p>
+    `;
+    // Insert right before the save button container
+    const saveParent = saveAdminBtn ? saveAdminBtn.parentNode : adminPanelView;
+    saveParent.insertBefore(syncPassDiv, saveAdminBtn);
+  }
+
   // Unlock Admin Panel
   if (unlockBtn) {
     unlockBtn.addEventListener("click", () => {
@@ -43,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Save Master Settings & Sync to Firestore
-  // Save Master Settings & Sync to Firestore
   if (saveAdminBtn) {
     saveAdminBtn.addEventListener("click", async () => {
       const congsVal = congInput ? congInput.value.trim() : "";
@@ -54,19 +69,38 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("kk_master_groups", groupsVal);
       localStorage.setItem("kk_master_group_territories", groupTerrVal);
 
-      alert("Master settings saved locally! Syncing to cloud...");
+      // Get passphrase from the dedicated admin input or fallbacks
+      const adminPassInput = document.getElementById("admin-sync-passphrase");
+      const globalPassInput = document.getElementById("sync-passphrase-input");
+      let passphrase = adminPassInput ? adminPassInput.value.trim() : "";
+      if (!passphrase && globalPassInput) passphrase = globalPassInput.value.trim();
+      if (!passphrase) passphrase = localStorage.getItem("kk_last_passphrase") || "";
 
-      // Automatically sync to cloud if a passphrase is saved/entered
-      const passInput = document.getElementById("sync-passphrase-input");
-      const passphrase = passInput ? passInput.value.trim() : "";
+      if (passphrase) {
+        localStorage.setItem("kk_last_passphrase", passphrase);
+      }
+
+      alert("Master settings saved locally! Syncing to cloud...");
 
       if (passphrase && typeof window.backupToCloud === "function") {
         const success = await window.backupToCloud(passphrase);
         if (success) {
           alert("✓ Master settings successfully synced to the cloud for all publishers!");
+        } else {
+          alert("Master settings saved locally, but cloud sync failed. Check your network or passphrase.");
         }
       } else {
-        alert("Master settings saved! (Note: Enter your sync passphrase in the Cloud Backup section above to push these updates to other brothers).");
+        const entered = prompt("Master settings saved locally!\n\nEnter your shared cloud sync passphrase to push these updates to all publishers:");
+        if (entered && entered.trim().length >= 4) {
+          const cleanPass = entered.trim();
+          localStorage.setItem("kk_last_passphrase", cleanPass);
+          const success = await window.backupToCloud(cleanPass);
+          if (success) {
+            alert("✓ Master settings successfully synced to the cloud!");
+          }
+        } else {
+          alert("Saved locally. (Cloud sync skipped - no passphrase provided).");
+        }
       }
       
       if (typeof window.populateAllDropdowns === "function") {
@@ -93,13 +127,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // Populate all dynamic dropdowns across the app
   window.populateAllDropdowns = function() {
     const congs = (localStorage.getItem("kk_master_congregations") || "Goodhope English").split(",").map(s => s.trim()).filter(Boolean);
-    const groups = (localStorage.getItem("kk_master_groups") || "Haydon, Fairview").split(",").map(s => s.trim()).filter(Boolean);
+    const rawGroups = (localStorage.getItem("kk_master_groups") || "Haydon, Fairview").split(",").map(s => s.trim()).filter(Boolean);
     
+    // Auto-include any extra groups defined in the mapping block
+    const mapping = window.getGroupTerritoryMap();
+    let groups = [...rawGroups];
+    Object.keys(mapping).forEach(g => {
+      if (g && !groups.includes(g)) groups.push(g);
+    });
+
     // 1. Lock/Set the Congregation in settings form automatically to the first official admin congregation
     const defaultCongInput = document.getElementById("default-congregation-input");
     if (defaultCongInput && congs.length > 0) {
       defaultCongInput.value = congs[0];
-      defaultCongInput.setAttribute("readonly", true); // Lock it down to admin setting
+      defaultCongInput.setAttribute("readonly", true);
       defaultCongInput.classList.add("bg-slate-950", "text-slate-400", "cursor-not-allowed");
     }
 
@@ -121,7 +162,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const filterTerrSelect = document.getElementById("filter-territory");
     if (filterTerrSelect) {
       const currentVal = filterTerrSelect.value;
-      const mapping = window.getGroupTerritoryMap();
       let allTerrs = [];
       Object.values(mapping).forEach(arr => { allTerrs = allTerrs.concat(arr); });
       if (allTerrs.length === 0) allTerrs = ["001", "002", "003", "004"];
@@ -175,7 +215,6 @@ document.addEventListener("DOMContentLoaded", () => {
       el.value = currentVal;
     }
   }
-
 
   // Run on load
   window.populateAllDropdowns();
