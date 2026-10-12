@@ -128,15 +128,12 @@
               <option value="ALL">All Territories</option>
             </select>
             <select
-              id="filter-status"
+              id="sort-order"
               onchange="window.filterRecords()"
               class="bg-slate-800 border border-slate-700 text-xs rounded p-2 text-white focus:outline-none focus:border-emerald-500 flex-1 sm:flex-none"
             >
-              <option value="ALL">All Statuses</option>
-              <option value="Not at Home">🔴 Not at Home</option>
-              <option value="Preached">🟢 Preached</option>
-              <option value="Return Visit">🔵 Return Visit</option>
-              <option value="Bible Study">🟡 Bible Study</option>
+              <option value="oldest">⏳ Oldest Preached First (Priority)</option>
+              <option value="newest">🕒 Recently Preached First</option>
             </select>
           </div>
         </div>
