@@ -29,7 +29,7 @@ async function hashPassphrase(passphrase) {
 }
 
 /**
- * Backup local visit records to Firebase using passphrase
+ * Backup local visit records and admin master settings to Firebase using passphrase
  */
 window.backupToCloud = async function(passphrase) {
   if (!passphrase || passphrase.trim().length < 4) {
@@ -41,13 +41,21 @@ window.backupToCloud = async function(passphrase) {
     const hashKey = await hashPassphrase(passphrase);
     const records = JSON.parse(localStorage.getItem("knock-knock-visits") || "[]");
     
-    // Save to Firestore collection under hashed key
+    // Grab organizer's approved master settings from localStorage
+    const masterCongregations = localStorage.getItem("kk_master_congregations") || "";
+    const masterGroups = localStorage.getItem("kk_master_groups") || "";
+    const masterGroupTerritories = localStorage.getItem("kk_master_group_territories") || "";
+    
+    // Save records and master settings to Firestore collection under hashed key
     await db.collection("territory_backups").doc(hashKey).set({
       records: records,
+      masterCongregations: masterCongregations,
+      masterGroups: masterGroups,
+      masterGroupTerritories: masterGroupTerritories,
       updatedAt: new Date().toISOString()
     });
 
-    console.log("☁️ Successfully backed up records to Firebase!");
+    console.log("☁️ Successfully backed up records and master settings to Firebase!");
     return true;
   } catch (error) {
     console.error("Firebase Backup Error:", error);
@@ -57,7 +65,7 @@ window.backupToCloud = async function(passphrase) {
 };
 
 /**
- * Restore records from Firebase using passphrase
+ * Restore records and admin master settings from Firebase using passphrase
  */
 window.restoreFromCloud = async function(passphrase) {
   if (!passphrase || passphrase.trim().length < 4) {
@@ -75,16 +83,30 @@ window.restoreFromCloud = async function(passphrase) {
     }
 
     const data = docRef.data();
-    if (data && data.records) {
-      // Save to local storage
-      localStorage.setItem("knock-knock-visits", JSON.stringify(data.records));
+    if (data) {
+      // 1. Restore house visit pins
+      if (data.records) {
+        localStorage.setItem("knock-knock-visits", JSON.stringify(data.records));
+      }
+
+      // 2. Restore Organizer Master Settings so every publisher gets the exact same approved setup
+      if (data.masterCongregations) {
+        localStorage.setItem("kk_master_congregations", data.masterCongregations);
+      }
+      if (data.masterGroups) {
+        localStorage.setItem("kk_master_groups", data.masterGroups);
+      }
+      if (data.masterGroupTerritories) {
+        localStorage.setItem("kk_master_group_territories", data.masterGroupTerritories);
+      }
       
-      // Refresh memory, lists, and map markers
+      // 3. Refresh UI dropdowns, memory, lists, and map markers across the app
+      if (typeof window.populateAllDropdowns === "function") window.populateAllDropdowns();
       if (typeof window.loadRecords === "function") window.loadRecords();
       if (typeof window.renderRecordsList === "function") window.renderRecordsList();
       if (typeof window.recreatePins === "function") window.recreatePins();
 
-      console.log("☁️ Successfully restored records from Firebase!");
+      console.log("☁️ Successfully restored records and master settings from Firebase!");
       return true;
     }
     return false;
