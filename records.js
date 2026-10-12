@@ -150,7 +150,7 @@ function renderRecordsList(recordsToRender = visitRecords) {
               🗑️
           </button>
         </div>
-            <p class="text-xs text-slate-400 mt-2">Publisher: ${rec.publisher || "N/A"}</p>
+        
     </div>
 `
     )
