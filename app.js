@@ -135,6 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const congregationInput = document.getElementById("visit-congregation");
       const groupInput = document.getElementById("visit-group");
       const territoryInput = document.getElementById("visit-territory");
+      const notesInput = document.getElementById("visit-notes");
 
       const newRecord = {
         id: Date.now(),
