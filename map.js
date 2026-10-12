@@ -102,5 +102,9 @@ map.on("click", (e) => {
   const visitModal = document.getElementById("visit-modal");
   if (visitModal) {
     visitModal.classList.remove("hidden");
+    // Hide the "My Location" button temporarily
+  const recenterBtn = document.getElementById("recenter-btn");
+  if (recenterBtn) recenterBtn.style.display = "none";
   }
+  
 });
