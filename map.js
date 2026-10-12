@@ -82,3 +82,25 @@ document.addEventListener("DOMContentLoaded", () => {
     recenterToUserLocation();
   }, 300);
 });
+
+// ==========================================================
+// MAP CLICK INTERCEPTOR (OPEN VISIT MODAL)
+// ==========================================================
+map.on("click", (e) => {
+  // 1. Store temporary clicked coordinates
+  window.activeTempCoords = {
+    lat: e.latlng.lat,
+    lng: e.latlng.lng
+  };
+
+  // 2. Pre-populate default publisher/territory settings
+  if (typeof window.populateModalDefaults === "function") {
+    window.populateModalDefaults();
+  }
+
+  // 3. Open the visit modal
+  const visitModal = document.getElementById("visit-modal");
+  if (visitModal) {
+    visitModal.classList.remove("hidden");
+  }
+});
