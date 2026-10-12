@@ -193,6 +193,10 @@ function addPinToMap(rec) {
           <b style="font-size: 14px;">${iconEmoji} ${rec.status}</b><br>
           <span><b>Householder:</b> ${rec.person || "N/A"}</span><br>
           <small style="color: #475569;">Territory #${rec.territory || "N/A"} (${rec.group || "N/A"})</small><br>
+          
+          <!-- ADD THIS NOTES LINE IN THE POPUP HERE -->
+          ${rec.notes ? `<div style="margin-top: 4px; padding: 4px 6px; background: #f1f5f9; border-radius: 4px; font-size: 11px; color: #334155;">📝 ${rec.notes}</div>` : ""}
+          
           <small style="color: #64748b;">Logged by ${rec.publisher || "Unknown"} on ${rec.date}</small>
           <br><br>
           <button onclick="window.deletePin(${rec.id})" 
