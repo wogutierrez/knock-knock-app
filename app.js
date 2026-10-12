@@ -7,20 +7,48 @@ window.KK_KEYS = {
 };
 
 // Instantly available global function
+// Instantly available global function
 window.populateModalDefaults = function () {
   const pubInput = document.getElementById("publisher-name");
   const congInput = document.getElementById("visit-congregation");
   const grpInput = document.getElementById("visit-group");
   const terrInput = document.getElementById("visit-territory");
 
-  if (pubInput)
+  if (pubInput) {
     pubInput.value = localStorage.getItem(window.KK_KEYS.PUBLISHER) || "";
-  if (congInput)
-    congInput.value = localStorage.getItem(window.KK_KEYS.CONGREGATION) || "";
-  if (grpInput)
-    grpInput.value = localStorage.getItem(window.KK_KEYS.GROUP) || "";
-  if (terrInput)
+  }
+
+  // 1. Automatically lock and stamp the official Admin Congregation
+  if (congInput) {
+    const rawCongs = localStorage.getItem("kk_master_congregations") || "Goodhope English";
+    const officialCong = rawCongs.split(",")[0].trim(); // Takes the primary admin congregation
+    congInput.value = officialCong;
+    congInput.setAttribute("disabled", "true"); // Locks it so it can't be edited in the modal
+  }
+
+  // 2. Populate Group dropdown from the approved admin master list
+  if (grpInput) {
+    const groups = (localStorage.getItem("kk_master_groups") || "Haydon, Fairview").split(",").map(s => s.trim()).filter(Boolean);
+    const currentGroup = localStorage.getItem(window.KK_KEYS.GROUP) || groups[0] || "";
+    
+    grpInput.innerHTML = "";
+    groups.forEach(g => {
+      const opt = document.createElement("option");
+      opt.value = g;
+      opt.textContent = g;
+      grpInput.appendChild(opt);
+    });
+    if (groups.includes(currentGroup)) {
+      grpInput.value = currentGroup;
+    }
+  }
+
+  // 3. Trigger territory update based on the selected group
+  if (typeof window.updateTerritoryDropdownForGroup === "function") {
+    window.updateTerritoryDropdownForGroup();
+  } else if (terrInput) {
     terrInput.value = localStorage.getItem(window.KK_KEYS.TERRITORY) || "";
+  }
 };
 
 document.addEventListener("DOMContentLoaded", () => {
