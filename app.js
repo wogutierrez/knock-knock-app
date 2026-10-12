@@ -7,7 +7,6 @@ window.KK_KEYS = {
 };
 
 // Instantly available global function
-// Instantly available global function
 window.populateModalDefaults = function () {
   const pubInput = document.getElementById("publisher-name");
   const congInput = document.getElementById("visit-congregation");
@@ -21,33 +20,31 @@ window.populateModalDefaults = function () {
   // 1. Automatically lock and stamp the official Admin Congregation
   if (congInput) {
     const rawCongs = localStorage.getItem("kk_master_congregations") || "Goodhope English";
-    const officialCong = rawCongs.split(",")[0].trim(); // Takes the primary admin congregation
+    const officialCong = rawCongs.split(",")[0].trim();
     congInput.value = officialCong;
-    congInput.setAttribute("disabled", "true"); // Locks it so it can't be edited in the modal
+    congInput.setAttribute("readonly", "true");
   }
 
-  // 2. Populate Group dropdown from the approved admin master list
+  // 2. Lock and stamp Group from the publisher's saved settings
   if (grpInput) {
-    const groups = (localStorage.getItem("kk_master_groups") || "Haydon, Fairview").split(",").map(s => s.trim()).filter(Boolean);
-    const currentGroup = localStorage.getItem(window.KK_KEYS.GROUP) || groups[0] || "";
-    
-    grpInput.innerHTML = "";
-    groups.forEach(g => {
-      const opt = document.createElement("option");
-      opt.value = g;
-      opt.textContent = g;
-      grpInput.appendChild(opt);
-    });
-    if (groups.includes(currentGroup)) {
-      grpInput.value = currentGroup;
+    const savedGroup = localStorage.getItem(window.KK_KEYS.GROUP) || "";
+    if (grpInput.tagName === "SELECT") {
+      grpInput.value = savedGroup;
+    } else {
+      grpInput.value = savedGroup;
+      grpInput.setAttribute("readonly", "true");
     }
   }
 
-  // 3. Trigger territory update based on the selected group
-  if (typeof window.updateTerritoryDropdownForGroup === "function") {
-    window.updateTerritoryDropdownForGroup();
-  } else if (terrInput) {
-    terrInput.value = localStorage.getItem(window.KK_KEYS.TERRITORY) || "";
+  // 3. Lock and stamp Territory from the publisher's saved settings
+  if (terrInput) {
+    const savedTerritory = localStorage.getItem(window.KK_KEYS.TERRITORY) || "";
+    if (terrInput.tagName === "SELECT") {
+      terrInput.value = savedTerritory;
+    } else {
+      terrInput.value = savedTerritory;
+      terrInput.setAttribute("readonly", "true");
+    }
   }
 };
 
