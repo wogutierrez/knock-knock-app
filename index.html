@@ -181,12 +181,34 @@
 
               <div>
                 <label class="block text-xs font-semibold text-slate-300 mb-1">CONGREGATION</label>
-                <input
-                  type="text"
+                <select
                   id="default-congregation-input"
-                  placeholder="e.g. Goodhope English"
                   class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white focus:outline-none focus:border-emerald-500 text-sm"
-                />
+                >
+                  <!-- Populated dynamically from Admin Master List -->
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">GROUP</label>
+                  <select
+                    id="default-group-input"
+                    onchange="window.updateSettingsTerritoryDropdown()"
+                    class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white focus:outline-none focus:border-emerald-500 text-sm"
+                  >
+                    <!-- Populated dynamically from Admin Master List -->
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-1">TERRITORY #</label>
+                  <select
+                    id="default-territory-input"
+                    class="w-full bg-slate-900 border border-slate-700 rounded p-3 text-white focus:outline-none focus:border-emerald-500 text-sm"
+                  >
+                    <!-- Populated dynamically from Admin Master List based on Group -->
+                  </select>
+                </div>
               </div>
 
               <div class="grid grid-cols-2 gap-3">
