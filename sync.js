@@ -118,4 +118,13 @@ window.restoreFromCloud = async function(passphrase) {
     alert("Restore failed. Check your internet connection or Firebase configuration.");
     return false;
   }
+
+
+
 };
+
+// Refresh UI dropdowns, memory, lists, and map markers across the app
+if (typeof window.populateAllDropdowns === "function") window.populateAllDropdowns();
+if (typeof window.loadRecords === "function") window.loadRecords();
+if (typeof window.renderRecordsList === "function") window.renderRecordsList();
+if (typeof window.recreatePins === "function") window.recreatePins();
