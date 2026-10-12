@@ -4,12 +4,12 @@
 
 // TODO: Replace these placeholders with your free Firebase project configuration
 const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDdkNUhrDBzblJqPK4NEB90nUqfnYdbQ7w",
+  authDomain: "knock-knock-app-43c71.firebaseapp.com",
+  projectId: "knock-knock-app-43c71",
+  storageBucket: "knock-knock-app-43c71.firebasestorage.app",
+  messagingSenderId: "93064544930",
+  appId: "1:93064544930:web:1079ed4dda65dcb0760dfb",
 };
 
 // Initialize Firebase if not already initialized
