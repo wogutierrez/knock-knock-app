@@ -92,6 +92,11 @@ window.restoreFromCloud = async function(passphrase) {
       if (typeof window.recreatePins === "function") window.recreatePins();
 
       console.log("☁️ Successfully restored records and master settings from Firebase!");
+
+      // Force a clean confirmation and reload so dropdowns reflect new master settings immediately
+      alert("✓ Successfully restored from cloud! The page will now refresh to load your new groups and territories.");
+      window.location.reload();
+
       return true;
     }
     return false;
