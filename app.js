@@ -150,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
             : "House Visit",
         phone: phoneInput ? phoneInput.value.trim() : "",
         status: statusInput ? statusInput.value : "Not at Home",
+        notes: notesInput ? notesInput.value.trim() : "",
         date: new Date().toLocaleDateString()
       };
 
