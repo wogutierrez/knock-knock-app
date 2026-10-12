@@ -1,3 +1,34 @@
+// Helper to populate a select element with options
+function populateSelectOptions(selectEl, optionsArray, selectedValue) {
+  if (!selectEl) return;
+  selectEl.innerHTML = "";
+  optionsArray.forEach(optVal => {
+    const opt = document.createElement("option");
+    opt.value = optVal;
+    opt.textContent = optVal;
+    selectEl.appendChild(opt);
+  });
+  if (optionsArray.includes(selectedValue)) {
+    selectEl.value = selectedValue;
+  } else if (optionsArray.length > 0) {
+    selectEl.value = optionsArray[0];
+  }
+}
+
+// Dynamically update Settings Territory dropdown based on selected Group
+window.updateSettingsTerritoryDropdown = function() {
+  const grpInput = document.getElementById("default-group-input");
+  const terrInput = document.getElementById("default-territory-input");
+  if (!grpInput || !terrInput) return;
+
+  const selectedGroup = grpInput.value;
+  const mapping = typeof window.getGroupTerritoryMap === "function" ? window.getGroupTerritoryMap() : {};
+  const groupTerrs = mapping[selectedGroup] || ["001", "002"];
+  const currentTerr = localStorage.getItem(window.KK_KEYS?.TERRITORY || "kk_default_territory") || "";
+
+  populateSelectOptions(terrInput, groupTerrs, currentTerr);
+};
+
 function loadSettings() {
   const pubInput = document.getElementById("default-publisher-input");
   const congInput = document.getElementById("default-congregation-input");
@@ -12,10 +43,19 @@ function loadSettings() {
   };
 
   if (pubInput) pubInput.value = localStorage.getItem(KEYS.PUBLISHER) || "";
-  if (congInput)
-    congInput.value = localStorage.getItem(KEYS.CONGREGATION) || "";
-  if (grpInput) grpInput.value = localStorage.getItem(KEYS.GROUP) || "";
-  if (terrInput) terrInput.value = localStorage.getItem(KEYS.TERRITORY) || "";
+
+  // 1. Populate Congregation dropdown from Admin Master List
+  const congs = (localStorage.getItem("kk_master_congregations") || "Goodhope English").split(",").map(s => s.trim()).filter(Boolean);
+  const savedCong = localStorage.getItem(KEYS.CONGREGATION) || congs[0] || "";
+  populateSelectOptions(congInput, congs, savedCong);
+
+  // 2. Populate Group dropdown from Admin Master List
+  const groups = (localStorage.getItem("kk_master_groups") || "Haydon, Fairview").split(",").map(s => s.trim()).filter(Boolean);
+  const savedGrp = localStorage.getItem(KEYS.GROUP) || groups[0] || "";
+  populateSelectOptions(grpInput, groups, savedGrp);
+
+  // 3. Populate Territory dropdown based on selected Group
+  window.updateSettingsTerritoryDropdown();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -57,10 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  // ... existing loadSettings() and settingsForm logic ...
 
   // --- CLOUD SYNC EVENT HANDLERS ---
   const btnBackup = document.getElementById("btn-cloud-backup");
