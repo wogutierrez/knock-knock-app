@@ -49,7 +49,14 @@ document.addEventListener("DOMContentLoaded", () => {
       if (groupInput) localStorage.setItem("kk_master_groups", groupInput.value.trim());
       if (terrInput) localStorage.setItem("kk_master_territories", terrInput.value.trim());
 
-      alert("Master lists saved successfully! Dropdowns updated.");
+      // Persist to Cloud/Firestore if cloud sync is active
+      if (typeof window.saveMasterConfigToCloud === "function") {
+        window.saveMasterConfigToCloud();
+      }
+
+      alert("Master lists saved and updated successfully!");
+      
+      // Force refresh dropdowns across the app
       if (typeof window.populateAllDropdowns === "function") {
         window.populateAllDropdowns();
       }
