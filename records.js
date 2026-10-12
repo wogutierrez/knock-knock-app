@@ -66,19 +66,38 @@ function populateTerritoryDropdown() {
 /**
  * Filter records by selected Territory and Visit Status
  */
+/**
+ * Filter and sort records by Group, Territory, and Chronological Priority
+ */
 window.filterRecords = function () {
+  const selectedGroup =
+    document.getElementById("filter-group")?.value || "ALL";
   const selectedTerritory =
     document.getElementById("filter-territory")?.value || "ALL";
-  const selectedStatus =
-    document.getElementById("filter-status")?.value || "ALL";
+  const sortOrder =
+    document.getElementById("sort-order")?.value || "oldest";
 
-  const filtered = visitRecords.filter((rec) => {
+  // 1. Filter by Group and Territory
+  let filtered = visitRecords.filter((rec) => {
+    const matchesGroup =
+      selectedGroup === "ALL" ||
+      (rec.group || "Unassigned") === selectedGroup;
     const matchesTerritory =
       selectedTerritory === "ALL" ||
       (rec.territory || "Unassigned") === selectedTerritory;
-    const matchesStatus =
-      selectedStatus === "ALL" || rec.status === selectedStatus;
-    return matchesTerritory && matchesStatus;
+    return matchesGroup && matchesTerritory;
+  });
+
+  // 2. Sort chronologically (Oldest preached first by default)
+  filtered.sort((a, b) => {
+    const dateA = new Date(a.date || 0);
+    const dateB = new Date(b.date || 0);
+
+    if (sortOrder === "oldest") {
+      return dateA - dateB; // Oldest dates first (ascending)
+    } else {
+      return dateB - dateA; // Newest dates first (descending)
+    }
   });
 
   renderRecordsList(filtered);
