@@ -80,14 +80,25 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("kk_last_passphrase", passphrase);
       }
 
-      alert("Master settings saved locally! Syncing to cloud...");
+      // FIX: Add visual feedback during save
+      saveAdminBtn.textContent = "Saving...";
+      saveAdminBtn.disabled = true;
+
+      // Update UI immediately before cloud sync
+      if (typeof window.populateAllDropdowns === "function") {
+        window.populateAllDropdowns();
+      }
 
       if (passphrase && typeof window.backupToCloud === "function") {
-        const success = await window.backupToCloud(passphrase);
-        if (success) {
-          alert("✓ Master settings successfully synced to the cloud for all publishers!");
-        } else {
-          alert("Master settings saved locally, but cloud sync failed. Check your network or passphrase.");
+        try {
+          const success = await window.backupToCloud(passphrase);
+          if (success) {
+            alert("✓ Master settings successfully synced to the cloud for all publishers!");
+          } else {
+            alert("Master settings saved locally, but cloud sync failed. Check your network or passphrase.");
+          }
+        } catch(e) {
+          alert("Saved locally. Cloud sync error: " + e.message);
         }
       } else {
         const entered = prompt("Master settings saved locally!\n\nEnter your shared cloud sync passphrase to push these updates to all publishers:");
@@ -103,9 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       
-      if (typeof window.populateAllDropdowns === "function") {
-        window.populateAllDropdowns();
-      }
+      saveAdminBtn.textContent = "💾 Save Master Settings & Sync Cloud";
+      saveAdminBtn.disabled = false;
     });
   }
 
@@ -139,9 +149,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. Lock/Set the Congregation in settings form automatically to the first official admin congregation
     const defaultCongInput = document.getElementById("default-congregation-input");
     if (defaultCongInput && congs.length > 0) {
-      defaultCongInput.value = congs[0];
-      defaultCongInput.setAttribute("readonly", true);
-      defaultCongInput.classList.add("bg-slate-950", "text-slate-400", "cursor-not-allowed");
+      // FIX: Preserve user selection if exists, otherwise use first cong
+      const savedCong = localStorage.getItem(window.KK_KEYS?.CONGREGATION || "kk_default_congregation") || congs[0];
+      defaultCongInput.innerHTML = "";
+      congs.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        defaultCongInput.appendChild(opt);
+      });
+      defaultCongInput.value = savedCong;
+      // Don't make readonly if multiple congregations exist - let organizer choose
+      if (congs.length === 1) {
+        defaultCongInput.setAttribute("readonly", true);
+        defaultCongInput.classList.add("bg-slate-950", "text-slate-400", "cursor-not-allowed");
+      } else {
+        defaultCongInput.removeAttribute("readonly");
+        defaultCongInput.classList.remove("bg-slate-950", "text-slate-400", "cursor-not-allowed");
+      }
     }
 
     // 2. Populate Visit Modal Congregation (Locked to official congregation)
@@ -157,6 +182,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 5. Update territory dropdowns based on group selection
     updateTerritoryDropdownForGroup();
+    // FIX: Also update settings territory dropdown
+    if (typeof window.updateSettingsTerritoryDropdown === "function") {
+      window.updateSettingsTerritoryDropdown();
+    }
 
     // 6. Populate Records Filter Territory Dropdown
     const filterTerrSelect = document.getElementById("filter-territory");
@@ -213,6 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     if (items.includes(currentVal)) {
       el.value = currentVal;
+    } else if (items.length > 0 && !currentVal) {
+      // FIX: Auto-select first if no current value
+      el.value = items[0];
     }
   }
 

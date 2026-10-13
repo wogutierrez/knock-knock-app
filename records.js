@@ -11,10 +11,20 @@ let activeMarkers = {};
  */
 function saveRecords() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(visitRecords));
+    // FIX: Add size warning for Firestore 1MB limit
+    const jsonStr = JSON.stringify(visitRecords);
+    const sizeKB = new Blob([jsonStr]).size / 1024;
+    if (sizeKB > 800) {
+      console.warn(`⚠️ Records approaching Firestore limit: ${sizeKB.toFixed(1)}KB. Consider archiving.`);
+    }
+    localStorage.setItem(STORAGE_KEY, jsonStr);
     console.log(`💾 Saved ${visitRecords.length} records to localStorage`);
   } catch (error) {
     console.error("Error saving records:", error);
+    // FIX: Handle localStorage quota exceeded
+    if (error.name === 'QuotaExceededError') {
+      alert("Storage full! Please backup to cloud and clear old records.");
+    }
   }
 }
 
@@ -65,8 +75,6 @@ function populateTerritoryDropdown() {
 
 /**
  * Filter records by selected Territory and Visit Status
- */
-/**
  * Filter and sort records by Group, Territory, and Chronological Priority
  */
 window.filterRecords = function () {
@@ -90,8 +98,19 @@ window.filterRecords = function () {
 
   // 2. Sort chronologically (Oldest preached first by default)
   filtered.sort((a, b) => {
-    const dateA = new Date(a.date || 0);
-    const dateB = new Date(b.date || 0);
+    // FIX: OLD CODE: new Date(a.date || 0) failed when date was locale string
+    // NEW: Robust parser that handles both ISO and legacy locale strings
+    const parseDate = (d) => {
+      if (!d) return 0;
+      const t = new Date(d).getTime();
+      if (!isNaN(t)) return t;
+      // Fallback for legacy MM/DD/YYYY
+      const parts = d.split('/');
+      if (parts.length === 3) return new Date(`${parts[2]}-${parts[0]}-${parts[1]}`).getTime() || 0;
+      return 0;
+    };
+    const dateA = parseDate(a.date);
+    const dateB = parseDate(b.date);
 
     if (sortOrder === "oldest") {
       return dateA - dateB; // Oldest dates first (ascending)
@@ -126,7 +145,15 @@ function renderRecordsList(recordsToRender = visitRecords) {
 
   container.innerHTML = recordsToRender
     .map(
-      (rec) => `
+      (rec) => {
+        // FIX: Display ISO or legacy date nicely
+        let displayDate = rec.displayDate || rec.date || "N/A";
+        try {
+          if (rec.date && rec.date.includes('T')) {
+            displayDate = new Date(rec.date).toLocaleDateString();
+          }
+        } catch(e) {}
+        return `
     <div class="bg-slate-800 border border-slate-700 p-4 rounded-xl flex justify-between items-center shadow-sm">
         <div class="flex-1">
             <div class="flex items-center space-x-2">
@@ -155,7 +182,7 @@ function renderRecordsList(recordsToRender = visitRecords) {
             </div>
 
             <p class="text-xs text-slate-400 mt-2">Publisher: ${rec.publisher || "N/A"}</p>
-            <p class="text-[10px] text-slate-500 mt-0.5">Date: 📅 ${rec.date}</p>
+            <p class="text-[10px] text-slate-500 mt-0.5">Date: 📅 ${displayDate}</p>
             <p class="text-[10px] text-slate-500 mt-0.5"> Notes: 📝 ${rec.notes || "None"}</p>
         </div>
         <div class="flex items-center space-x-2 flex-shrink-0">
@@ -172,6 +199,7 @@ function renderRecordsList(recordsToRender = visitRecords) {
         
     </div>
 `
+      }
     )
     .join("");
 }
@@ -210,7 +238,7 @@ function addPinToMap(rec) {
           <b style="font-size: 14px;">${iconEmoji} ${rec.status}</b><br>
           <span><b>Householder:</b> ${rec.person || "N/A"}</span><br>
           <small style="color: #475569;">Territory #${rec.territory || "N/A"} (${rec.group || "N/A"})</small><br>
-          <small style="color: #64748b;">Logged by ${rec.publisher || "Unknown"} on ${rec.date}</small>
+          <small style="color: #64748b;">Logged by ${rec.publisher || "Unknown"} on ${rec.date ? new Date(rec.date).toLocaleDateString() : rec.date}</small>
           
           ${rec.notes ? `<div style="margin-top: 4px; padding: 4px 6px; background: #f1f5f9; border-radius: 4px; font-size: 11px; color: #334155;">📝 ${rec.notes}</div>` : ""}
           
@@ -300,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!groupFilterEl || !terrFilterEl) return;
 
     const selectedGroup = groupFilterEl.value;
-    const mapping = window.getGroupTerritoryMap();
+    const mapping = window.getGroupTerritoryMap ? window.getGroupTerritoryMap() : {};
 
     terrFilterEl.innerHTML = '<option value="ALL">All Territories</option>';
 
