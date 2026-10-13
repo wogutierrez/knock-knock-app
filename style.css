@@ -1,6 +1,48 @@
-/* Explicit height styling ensures Leaflet map renders smoothly without blank spaces */
+/* ==========================================
+   Knock Knock - Map Styles
+   FIXED VERSION - Based on your original
+   ========================================== */
+
+/* YOUR ORIGINAL CODE (kept):
 #map {
   height: 100%;
   width: 100%;
   z-index: 1;
+}
+WHY IT WAS ALMOST PERFECT: Leaflet needs explicit height, you had it.
+FIX: Changed z-index from 1 to 0 so floating buttons (z-[1000]) always stay on top, and added fixes for Tailwind reset conflicts.
+*/
+
+#map {
+  height: 100%;
+  width: 100%;
+  min-height: 100%; /* FIX: Ensures map fills tab even on small Android webview */
+  z-index: 0; /* FIX: Was 1, now 0 so recenter button at z-1000 is always above */
+}
+
+/* FIX: Tailwind preflight sets img {display:block} which breaks Leaflet controls */
+.leaflet-container {
+  background: #0f172a; /* Matches your background_color #0f172a from manifest */
+}
+.leaflet-container img {
+  max-width: none !important;
+}
+.leaflet-control {
+  font-family: sans-serif;
+}
+
+/* FIX: Custom divIcons were getting Tailwind borders */
+.custom-map-icon,
+.user-gps-dot {
+  background: transparent;
+  border: none;
+}
+
+/* FIX: Map tiles were showing behind modal on some devices */
+.leaflet-pane {
+  z-index: 0;
+}
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 400;
 }
