@@ -59,6 +59,12 @@ function recenterToUserLocation() {
       (error) => {
         if (recenterBtn) recenterBtn.classList.remove("opacity-50");
         console.error("GPS Error:", error);
+        // FIX: Show user-friendly error instead of silent fail
+        if (error.code === 1) {
+          console.warn("User denied geolocation permission");
+        } else {
+          alert("Could not get your location. Please check GPS permission.");
+        }
       },
       {
         enableHighAccuracy: true,
@@ -107,4 +113,8 @@ map.on("click", (e) => {
   if (recenterBtn) recenterBtn.style.display = "none";
   }
   
+  // FIX: Ensure dropdowns are populated before modal opens (was race condition)
+  if (typeof window.populateAllDropdowns === "function") {
+    window.populateAllDropdowns();
+  }
 });
