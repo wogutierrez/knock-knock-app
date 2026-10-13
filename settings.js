@@ -56,6 +56,12 @@ function loadSettings() {
 
   // 3. Populate Territory dropdown based on selected Group
   window.updateSettingsTerritoryDropdown();
+
+  // FIX: Restore last passphrase for convenience (was missing)
+  const passInput = document.getElementById("sync-passphrase-input");
+  if (passInput) {
+    passInput.value = localStorage.getItem("kk_last_passphrase") || "";
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -121,10 +127,15 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Please enter a sync passphrase.");
         return;
       }
+      // FIX: Save passphrase for admin auto-sync
+      localStorage.setItem("kk_last_passphrase", passphrase);
       btnBackup.textContent = "Backing up...";
+      btnBackup.disabled = true;
       const success = await window.backupToCloud(passphrase);
       btnBackup.textContent = "⬆️ Backup to Cloud";
+      btnBackup.disabled = false;
       if (success) showSyncToast("✓ Successfully backed up pins to cloud!");
+      else showSyncToast("❌ Backup failed!", true);
     });
   }
 
@@ -135,10 +146,15 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Please enter a sync passphrase.");
         return;
       }
+      localStorage.setItem("kk_last_passphrase", passphrase);
+      if (!confirm("Restore will overwrite local pins. Continue?")) return;
       btnRestore.textContent = "Restoring...";
+      btnRestore.disabled = true;
       const success = await window.restoreFromCloud(passphrase);
       btnRestore.textContent = "⬇️ Restore from Cloud";
+      btnRestore.disabled = false;
       if (success) showSyncToast("✓ Successfully restored pins from cloud!");
+      else showSyncToast("❌ Restore failed!", true);
     });
   }
 });
