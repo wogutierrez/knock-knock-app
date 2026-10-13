@@ -127,6 +127,12 @@ document.addEventListener("DOMContentLoaded", () => {
           setTimeout(() => window.map.invalidateSize(), 150);
         });
       }
+
+      // FIX: Repopulate filters when entering records tab (was missing)
+      if (tab.view === "tab-records") {
+        if (typeof window.populateRecordsGroupFilter === "function") window.populateRecordsGroupFilter();
+        if (typeof window.filterRecords === "function") window.filterRecords();
+      }
     });
   });
 
@@ -181,7 +187,16 @@ document.addEventListener("DOMContentLoaded", () => {
         phone: phoneInput ? phoneInput.value.trim() : "",
         status: statusInput ? statusInput.value : "Not at Home",
         notes: notesInput ? notesInput.value.trim() : "",
-        date: new Date().toLocaleDateString()
+        // ===========================================
+        // FIX: OLD CODE USED toLocaleDateString() - BUGGY
+        // OLD: date: new Date().toLocaleDateString()
+        // WHY BAD: Locale-dependent string like "10/13/2026" cannot be reliably parsed by new Date() on Android
+        // Sorting broke, and Date comparison failed.
+        // NEW: Use ISO string for storage, format on display
+        // ===========================================
+        date: new Date().toISOString(),
+        // Keep display helper for UI
+        displayDate: new Date().toLocaleDateString()
       };
 
       if (typeof window.addNewVisit === "function") {
